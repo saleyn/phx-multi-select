@@ -1,33 +1,49 @@
-defmodule Phoenix.LiveView.Components.MultiSelect.Option do
-  defstruct \
-    id:       nil,
-    label:    nil,
-    selected: false,
-    visible:  true
-
-  @type t :: %__MODULE__{
-    id:       integer,
-    label:    String.t,
-    selected: boolean,
-    visible:  true
-  }
-
-  def new(%{} = map) do
-    %__MODULE__{id: map[:id], label: map[:label], selected: map[:selected]}
-  end
-end
-
 defmodule Phoenix.LiveView.Components.MultiSelect do
   use    Phoenix.LiveComponent
   alias  Phoenix.LiveView.JS
 
-  attr :id,        :string,  required: true
-  attr :debounce,  :integer, default:  400
-  attr :options,   :list,    default:  []
-  attr :form,      :any,     required: true
-  attr :on_change, :any,     required: true   # Lambda `(options) -> ok`
+  defmodule Option do
+    @doc """
+    The option struct is passed to
+    """
+    defstruct \
+      id:       nil,
+      label:    nil,
+      selected: false,
+      visible:  true
+
+    @type t :: %__MODULE__{
+      id:       integer,
+      label:    String.t,
+      selected: boolean,
+      visible:  true
+    }
+
+    def new(%{} = map) do
+      %__MODULE__{
+        id:       Map.get(map, :id),
+        label:    Map.get(map, :label),
+        selected: Map.get(map, :selected) || false,
+      }
+    end
+  end
+
+  @doc """
+  MultiSelect LiveView component
+  """
+  attr :id,           :string,  required: true
+  attr :debounce,     :integer, default:  350
+  attr :options,      :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
+  attr :form,         :any,     required: true
+  attr :on_change,    :any,     required: true,  doc: "Lambda `(options) -> ok` to be called on selecting items"
+  attr :class,        :string,  default:  nil
+  attr :max_selected, :integer, default:  nil,   doc: "Max number of items selected"
+  attr :wrap,         :boolean, default:  false, doc: "Permit multiline wrapping of selected items"
+  attr :title,        :string,  default:  nil,   doc: "Component tooltip title"
+  attr :placeholder,  :string,  default:  "Select...", doc: "Placeholder shown on empty input"
 
   def multi_select(assigns) do
+    assigns = %{assigns | options: (for o <- assigns.options, do: Option.new(o))}
     ~H"""
     <.live_component
       id={@id}
@@ -36,22 +52,33 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       form={@form}
       selected={@on_change}
       debounce={@debounce}
+      class={@class}
+      max_selected={@max_selected}
+      wrap={@wrap}
+      placeholder={@placeholder}
+      title={@title}
     />
     """
+  end
+
+  def update_settings(id, attrs) when is_list(attrs) do
+    send_update(__MODULE__, [{:id, id} | attrs])
   end
 
   def mount(socket) do
     {:ok,
       socket
-      |> assign(:filter,                        "")
-      |> assign(:placeholder, "Select category...")
-      |> assign(:max_shown,                      5)
-      |> assign(:cur_shown,                      5)
-      |> assign(:height,                    "3rem")
-      |> assign(:filter_checked,             false)
-      |> assign(:option_count,                   0)
-      |> assign(:selected_count,                 0)
-      |> assign(:filtered_count,                 0)
+      |> assign_new(:placeholder,    fn -> "Select..." end)
+      |> assign_new(:filter,         fn -> ""     end)
+      |> assign_new(:max_shown,      fn -> 5      end)
+      |> assign_new(:cur_shown,      fn -> 5      end)
+      |> assign_new(:max_selected,   fn -> nil    end)
+      |> assign_new(:wrap,           fn -> false  end)
+      |> assign_new(:filter_checked, fn -> false  end)
+      |> assign_new(:option_count,   fn -> 0      end)
+      |> assign_new(:selected_count, fn -> 0      end)
+      |> assign_new(:filtered_count, fn -> 0      end)
+      |> assign_new(:title,          fn -> nil    end)
     }
   end
 
@@ -64,66 +91,120 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     {:ok, socket}
   end
 
+  def update(%{id: id} = params, %{assigns: %{id: id}} = socket) do
+    {:ok, update2(socket, Map.delete(params, :id))}
+  end
+
+  defp update2(socket, attrs) do
+    Enum.reduce(attrs, socket, fn
+      ({:wrap         = k, v}, s) when is_boolean(v) -> assign(s, k, v)
+      ({:max_selected = k, v}, s) when is_integer(v) -> assign(s, k, v)
+    end)
+  end
+
+  ## This setting allows to customize CSS classes. It supposed to return the
+  ## module that has `apply_css(key, css_classes) -> css_classes :: String.t` function.
+  @class_callback Application.compile_env(:live_view, :multi_select, %{})[:class_callback] || __MODULE__
+
+  ## Customize the class name shared by the outer div
+  @class_prefix   Application.compile_env(:live_view, :multi_select, %{})[:class_prefix]   || "phx-msel"
+
+  ## Metadata with all CSS attributes for the MultiSelect component
+  @css %{
+    component:    @class_prefix <> " h-12 flex flex-col w-96 py-[7px] gap-1 relative sm:text-sm",
+    main:         " p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg",
+    tags:         " flex flex-wrap gap-1 w-full",
+    placeholder:  " select-none opacity-50 self-center",
+    tag:          " bg-blue-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
+    main_icons:   " right-2 self-center py-1 pl-1 z-10 flex place-items-center",
+    body:         " hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
+    filter:       " mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+    filter_icons: " absolute inset-y-0 right-2 flex items-center",
+    options:      " overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
+    option_label: " flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center",
+    option_input: " rounded w-4 h-4 mr-2 dark:checked:bg-blue-500 border border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
+    colors:       " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
+  }
+
+  defmacro css(key, add_color_class \\ false) do
+    quote do
+      value = unquote(add_color_class) && (@css[unquote(key)] <> @css[:colors]) || @css[unquote(key)]
+      @class_callback.apply_css(unquote(key), value)
+    end
+  end
+
   def render(%{selected_count: sel_cnt, option_count: opt_cnt, filtered_count: filt_cnt} = assigns) do
     hide_filter_icon = opt_cnt == 0 or sel_cnt == 0 or sel_cnt == opt_cnt
     assigns =
       assigns
       |> assign(:filter_icon_visibility, hide_filter_icon && "hidden" || "visible")
       |> assign(:filter_icon_color,
-          (opt_cnt > 0 and sel_cnt == filt_cnt) && "fill-zinc-400 hover:fill-zinc-500"
-                                                || "fill-blue-600 hover:fill-blue-700")
+          (opt_cnt > 0 and sel_cnt == filt_cnt) && "fill-blue-600 hover:fill-blue-700"
+                                                || "fill-zinc-400 hover:fill-zinc-500")
       |> assign(:filter_icon_title,
           (opt_cnt > 0 and sel_cnt == filt_cnt) && "Clear selected items filter"
                                                 || "Filter selected items")
+      |> assign(:filter_rest, @filter in [nil, ""] && [] || [name: "#{assigns[:id]}-filter"])
+      |> assign(:filter_id, "#{assigns.id}-filter")
+
+    IO.puts("Wrap=#{assigns.wrap}, Max=#{assigns.max_selected}")
     ~H"""
-    <div id={@id} style={"height: #{@height}"} class={"flex flex-col w-96 py-[7px] gap-1 relative sm:text-sm"}>
-      <div id={"#{@id}-main"} tabindex="0" class={"p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg" <> add_color_class()} phx-click={toggle_open(@id)}>
-        <div id={"#{@id}-tags"} class="flex flex-wrap gap-1 w-full" phx-hook="MultiSelectHook" data-target={@myself}>
-          <%= case @selected_count do %>
-            <% 0 -> %>
-              <span class="select-none opacity-50 self-center"><%= @placeholder %></span>
-            <% n when n > @cur_shown -> %>
-              <span class="bg-blue-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center flex">
+    <div id={@id} style={} class={css(:component)}>
+      <div id={"#{@id}-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)}  title={@title}>
+        <div id={"#{@id}-tags"} class={css(:tags)} phx-hook="MultiSelectHook" data-target={@myself} data-wrap={Atom.to_string(@wrap)}>
+          <%= cond do %>
+            <% @selected_count == 0 -> %>
+              <span class={css(:placeholder)}><%= @placeholder %></span>
+            <% @selected_count > @cur_shown and not @wrap -> %>
+              <span class={css(:tag)}>
                 <span><%= @selected_count %> items selected</span>
                 <.svg type={:close} size="4" color="" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
               </span>
-            <% _ -> %>
+            <% true -> %>
               <%= for option <- @checked_options do %>
-                <span id={"#{@id}-tag-#{option.id}"} class="bg-blue-600 rounded-md p-1 gap-1 text-white flex flex-wrap shrink-0 place-items-center select-none">
+                <span id={"#{@id}-tag-#{option.id}"} class={css(:tag) <> " flex-wrap shrink-0"}>
                   <span><%= option.label %></span>
                   <.svg type={:close} size="4" color="" on_click="checked" params={[{"uncheck", option.id}, {"id", @id}]} target={@myself}/>
                 </span>
               <% end %>
           <% end %>
         </div>
-        <div class="right-2 self-center py-1 pl-1 z-10 flex place-items-center">
+        <div class={css(:main_icons)}>
           <.svg type={:clear} :if={@selected_count > 1 and @selected_count <= @cur_shown}
             title="Clear Selected Items" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
           <.svg type={:updown} size="6" on_click={toggle_open(@id)}/>
         </div>
       </div>
-      <div id={"#{@id}-opts"} tabindex="0" style={"top: #{@height}"} class={"hidden absolute w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md" <> add_color_class()}
+      <div id={"#{@id}-opts"} tabindex="0" class={css(:body, true)}
         phx-click-away={toggle_open(@id)}>
         <div class="w-full p-0 relative">
-          <div class="absolute inset-y-0 right-2 flex items-center">
+          <div class={css(:filter_icons)}>
             <.svg type={:check} title={@filter_icon_title} color={@filter_icon_color} on_click="filter" params={[{"icon", "checked"}]} target={@myself}/>
             <.svg type={:clear} title="Clear Filter" on_click="filter" params={[{"icon", "clear"}]} target={@myself}/>
           </div>
-          <input id={"#{@id}-filter"} name={"#{@id}-filter"} type="text" autocomplete="off"
-            class={"mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5" <> add_color_class()}
+          <input id={@filter_id} name={@filter_id} type="text" autocomplete="off"
+            class={css(:filter, true)}
             placeholder="Search..." value={@filter}
             phx-debounce={@debounce}
-            phx-change="search" phx-target={@myself}>
+            phx-change="search" phx-target={@myself}
+            {[] #onkeypress={{:safe, "(function(e) { if (e.value == '') e.removeAttribute('name'); else e['name'] = e.id; })(this)"}}
+            }
+            >
         </div>
-        <div class="overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900">
-          <%= for opt <- @options, id = "#{@id}[#{opt.id}]" do %>
-            <div class="form-check pr-0" hidden={!opt.visible}>
-              <label class="form-cl flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center"
-                     for={id}>
+        <div class={css(:options)}>
+          <%=
+            for opt <- @options,
+                id        = "#{@id}[#{opt.id}]",
+                (disabled = disabled(@selected_count, @max_selected, opt.selected)) || true,
+                rest      = disabled && [disabled: true] || [],
+                cursor    = disabled && " cursor-not-allowed" || " cursor-pointer"
+            do
+          %>
+            <div class="pr-0" hidden={!opt.visible}>
+              <label for={id} class={css(:option_label)}>
                 <input id={id} name={id} type="checkbox" phx-change="checked" phx-target={@myself}
-                      checked={opt.selected} value="on"
-                      class="form-ci rounded w-4 h-4 mr-2 dark:checked:bg-blue-500 border border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 cursor-pointer transition duration-200"
-                />
+                      checked={opt.selected} value="on" class={css(:option_input) <> cursor}
+                      {rest}>
                 <%= opt.label %>
               </label>
             </div>
@@ -153,7 +234,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
           |> assign(:filter, word)
 
         {:noreply, socket}
-      nil ->
+      :error ->
         {:noreply, socket}
     end
   end
@@ -161,7 +242,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   ## Event triggered by pushEventTo from the MultiSelectHook when the tags
   ## in this component get wrapped to more than one line or become a single line
   def handle_event("wrapped", %{"value" => wrapped, "count" => count}, socket) do
-    IO.puts("Wrapped: #{wrapped}, count: #{count}, cur=#{socket.assigns.cur_shown}, max=#{socket.assigns.max_shown}")
+    #IO.puts("Wrapped: #{wrapped}, count: #{count}, cur=#{socket.assigns.cur_shown}, max=#{socket.assigns.max_shown}")
     {:noreply, assign(socket, :cur_shown, wrapped && count || socket.assigns.max_shown)}
   end
 
@@ -203,6 +284,9 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     {:noreply, socket}
   end
 
+  @doc false
+  def apply_css(_key, value), do: value
+
   defp set_selected(socket, "all", selected?) do
     {count, options} =
       Enum.reduce(socket.assigns.options, {0, []}, fn
@@ -231,7 +315,6 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       |> assign(:options,        options)
       |> assign(:option_count,   count)
       |> assign(:selected_count, sel_count)
-#      |> then(& (sel_count == 0 && apply_filter(&1) || socket))
 
     # Notify LiveView of the changes
     socket.assigns.selected.(options)
@@ -261,13 +344,46 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     |> assign(:filtered_count, fcount)
   end
 
+  defp disabled(_sel_cnt, _max,      true),                    do: false
+  defp disabled(sel_cnt,   max, _selected) when sel_cnt < max, do: false
+  defp disabled(_sel_cnt, _max, _selected),                    do: true
+
   defp filter_checked_options(options) do
     Enum.filter(options, fn opt -> opt.selected == true or opt.selected == "true" end)
   end
 
-  defp add_color_class() do
-    " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700" # focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-  end
+  @doc """
+  Calls a wired up event listener to call a function with arguments.
+    `window.addEventListener("js:exec", e => e.target[e.detail.call](...e.detail.args))`
+  """
+  def js_exec(js \\ %JS{}, to, call, args), do:
+    JS.dispatch(js, "js:exec", to: to, detail: %{call: call, args: args})
+
+  @doc """
+  Calls a wired up event listener to set a property on a DOM element.
+    `window.addEventListener("js:set", e => e.target[e.detail.key] = e.detail.value)`
+  """
+  def js_set(js \\ %JS{}, to, property, value), do:
+    JS.dispatch(js, "js:set", to: to, detail: %{key: property, value: value})
+
+  @doc """
+  Calls a wired up event listener to set the value of an input field.
+    `window.addEventListener("js:set_input_value", e => e.target.value = e.detail)`
+  """
+  def js_set_input_value(js \\ %JS{}, to, value), do:
+    JS.dispatch(js, "js:set_input_value", to: to, detail: value)
+
+  @doc """
+  Calls a wired up event listener to set the value of an input field.
+    ```
+    window.addEventListener("js:ignore_empty_input", e => {
+       if (e.target.value == "") e.target.name = e.target.id;
+       else                      e.target.removeAttribute('name');
+     })
+    ```
+  """
+  def js_ignore_empty_input(js \\ %JS{}, to), do:
+    JS.dispatch(js, "js:ignore_empty_input", to: to)
 
   attr :type,     :atom,    values:   [:close, :clear, :check, :updown]
   attr :size,     :string,  default:  "5"

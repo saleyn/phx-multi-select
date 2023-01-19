@@ -1,13 +1,32 @@
 <div id={@id} class="relative p-2 flex place-content-center">
   <.form :let={f} for={:input} id={"#{@id}-ms-form"}
           class="flex gap-2" phx-change="validate" phx-submit="save">
+    <label for="max_selected" class="flex px-5 text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center"
+           title="Limits the number of items the user is allowed to select from the list">
+      <div class="flex flex-col">
+      <span class="pb-2">Max Number of Selected Items = <%= @max_selected %></span>
+      <input type="range" name="max_selected" value={@max_selected}
+        min="1" max={SampleData.topics_count()} class="mr-2 dark:checked:bg-blue-500 border border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200"
+      >
+      </div>
+    </label>
+    <label for="wrap" class="flex px-5 text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center"
+           title="When 'true', the selected tags can wrap to a new line">
+      <input type="checkbox" name="wrap" class="rounded w-4 h-4 mr-2 dark:checked:bg-blue-500 border border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200"
+             value="on" checked={@wrap}>
+      Wrap Selected Items
+    </label>
     <MultiSelect.multi_select
       id="multi"
       options={@topics}
       form={f}
       on_change={fn opts -> send(self(), {:updated_options, opts}) end}
+      max_selected={@max_selected}
+      wrap={@wrap}
+      placeholder="Select topic..."
+      title="Select tipics to filter quotes"
     />
-    <.button name="submit" class="mt-2 p-3 h-12 !bg-blue-500 !hover:bg-blue-600">Submit</.button>
+    <button name="submit" class="mt-2 p-3 h-12 rounded-md font-medium text-sm text-white bg-primary-600 hover:bg-primary-500">Submit</button>
   </.form>
 </div>
 <div class="w-full mt-4">

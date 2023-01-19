@@ -33,7 +33,16 @@ topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", info => topbar.delayedShow(200))
 window.addEventListener("phx:page-loading-stop", info => topbar.hide())
 
+window.addEventListener("js:exec", e => e.target[e.detail.call](...e.detail.args))
+
 // connect if there are any LiveViews on the page
+let execJS = (selector, attr) => {
+  document.querySelectorAll(selector)
+          .forEach(el => liveSocket.execJS(el, el.getAttribute(attr)))
+}
+
+liveSocket.getSocket().onOpen( () => execJS("#connection-status", "js-hide"))
+liveSocket.getSocket().onError(() => execJS("#connection-status", "js-show"))
 liveSocket.connect()
 
 // expose liveSocket on window for web console debug logs and latency simulation:

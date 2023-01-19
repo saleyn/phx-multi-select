@@ -18,14 +18,24 @@ const MultiSelectHook = {
         prevItem = currItem;
       }
 
-      if (items.length > 1 && wrapped ^ this.wasWrapped) {
+      if (items.length > 1 && (wrapped ^ this.wasWrapped) && this.el.dataset.wrap !== 'true') {
         this.wasWrapped = wrapped
-        this.pushEventTo(this.el.dataset.target, "wrapped",
-          { count: eleCount, value: wrapped })
+        this.pushEventTo(this.el.dataset.target, 'wrapped', { count: eleCount, value: wrapped })
       }
     });
     resizeObserver.observe(this.el)
   },
 }
+
+// >>> START Global Event Listeners
+window.addEventListener("js:exec", e => e.target[e.detail.call](...e.detail.args))
+window.addEventListener("js:set",  e => e.target[e.detail.key] = e.detail.value)
+window.addEventListener("js:set_input_value", e => e.target.value = e.detail)
+window.addEventListener("js:ignore_empty_input", e => {
+  let t = e.target
+  if (t.value == "") t.name = t.id; else t.removeAttribute('name');
+})
+
+// <<< END Global Event Listeners
 
 export default MultiSelectHook
