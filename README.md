@@ -1,4 +1,7 @@
-# MultiSelectExample
+# Phoenix LiveView MultiSelect Component
+
+This project implements an Elixir Phoenix LiveView component that has a capability
+of selecting multiple checkboxed items from a list.
 
 To start your Phoenix server:
 
