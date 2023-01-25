@@ -3,6 +3,8 @@
 This project implements an Elixir Phoenix LiveView component that has a capability
 of selecting multiple checkboxed items from a list.
 
+![Example](https://user-images.githubusercontent.com/272543/214661918-110505f2-e796-40e3-a1ee-47178cb0daba.png)
+
 To start your Phoenix server:
 
   * Run `make` to build the project
