@@ -10,14 +10,12 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     defstruct \
       id:       nil,
       label:    nil,
-      selected: false,
-      visible:  true
+      selected: false
 
     @type t :: %__MODULE__{
       id:       integer,
       label:    String.t,
-      selected: boolean,
-      visible:  true
+      selected: boolean
     }
 
     def new(%{} = map) do
@@ -52,36 +50,33 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     * `:wrap` - allow to wrap selected tags to multiple lines
     * `:title` - component's title to use as the tooltip
     * `:placeholder` - component's placeholder text
+    * `:search_placeholder` - placeholder for the search input box
+    * `:search_cbox_titles` - titles `on|off` of the checked icon in the search checkbox
+      (default: "Clear filter of selected items|Filter selected items")
     * `:filter_side` - apply item filtering on client or server (default: client)
   """
-  attr :id,           :string,  required: true
-  attr :debounce,     :integer, default:  350
-  attr :options,      :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
-  attr :form,         :any,     required: true
-  attr :on_change,    :any,     required: true,  doc: "Lambda `(options) -> ok` to be called on selecting items"
-  attr :class,        :string,  default:  nil
-  attr :max_selected, :integer, default:  nil,   doc: "Max number of items selected"
-  attr :wrap,         :boolean, default:  false, doc: "Permit multiline wrapping of selected items"
-  attr :title,        :string,  default:  nil,   doc: "Component tooltip title"
-  attr :placeholder,  :string,  default:  "Select...", doc: "Placeholder shown on empty input"
-  attr :filter_side,  :atom,    default: :client, values: [:client, :server]
+  attr :id,                 :string,  required: true
+  attr :debounce,           :integer, default:  350
+  attr :options,            :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
+  attr :form,               :any,     required: true
+  attr :on_change,          :any,                      doc: "Lambda `(options) -> ok` to be called on selecting items"
+  attr :class,              :string,  default:  nil
+  attr :max_selected,       :integer, default:  nil,   doc: "Max number of items selected"
+  attr :max_shown,          :integer, default:  100000,doc: "Max number of shown selected tags"
+  attr :wrap,               :boolean, default:  false, doc: "Permit multiline wrapping of selected items"
+  attr :title,              :string,  default:  nil,   doc: "Component tooltip title"
+  attr :placeholder,        :string,  default:  "Select...", doc: "Placeholder shown on empty input"
+  attr :search_placeholder, :string,  default:  "Search...", doc: "Placeholder for the search input"
+  attr :search_cbox_titles, :string,  default:  "Clear filter of selected items|Filter selected items",
+                                                       doc: "Titles `on|off` of the checked icon in the search checkbox"
+  attr :filter_side,        :atom,    default:  :client, values: [:client, :server]
 
   def multi_select(assigns) do
-    assigns = %{assigns | options: (for o <- assigns.options, do: Option.new(o))}
+    assigns = assign(assigns, :options, (for o <- assigns.options, do: Option.new(o)))
+    rest    = Phoenix.Component.assigns_to_attributes(assigns, [])
+    assigns = assign(assigns, :rest,    rest)
     ~H"""
-    <.live_component
-      id={@id}
-      module={__MODULE__}
-      options={@options}
-      form={@form}
-      selected={@on_change}
-      debounce={@debounce}
-      class={@class}
-      max_selected={@max_selected}
-      wrap={@wrap}
-      placeholder={@placeholder}
-      title={@title}
-    />
+    <.live_component module={__MODULE__} {@rest}/>
     """
   end
 
@@ -89,21 +84,15 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     send_update(__MODULE__, [{:id, id} | attrs])
   end
 
-  def mount(socket) do
-    {:ok,
-      socket
-      |> assign_new(:placeholder,    fn -> "Select..." end)
-      |> assign_new(:filter,         fn -> ""     end)
-      |> assign_new(:max_shown,      fn -> 5      end)
-      |> assign_new(:cur_shown,      fn -> 5      end)
-      |> assign_new(:max_selected,   fn -> nil    end)
-      |> assign_new(:wrap,           fn -> false  end)
-      |> assign_new(:filter_checked, fn -> false  end)
-      |> assign_new(:option_count,   fn -> 0      end)
-      |> assign_new(:selected_count, fn -> 0      end)
-      |> assign_new(:filtered_count, fn -> 0      end)
-      |> assign_new(:title,          fn -> nil    end)
-    }
+  def mount(%{assigns: assigns} = socket) do
+    assigns =
+      assigns
+      |> assign(:filter,         "")
+      |> assign(:cur_shown,      10000)
+      |> assign(:filter_checked, false)
+      |> assign(:option_count,   0)
+      |> assign(:selected_count, 0)
+    {:ok, Map.put(socket, :assigns, assigns)}
   end
 
   def update(%{options: options} = assigns, socket) do
@@ -135,46 +124,46 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
   ## Metadata with all CSS attributes for the MultiSelect component
   @css %{
-    component:    @class_prefix <> " h-12 flex flex-col w-96 py-[7px] gap-1 relative sm:text-sm",
-    main:         " p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg",
-    tags:         " flex flex-wrap gap-1 w-full",
-    placeholder:  " select-none opacity-50 self-center",
-    tag:          " bg-blue-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
-    main_icons:   " right-2 self-center py-1 pl-1 z-10 flex place-items-center",
-    body:         " hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
-    filter:       " mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-    filter_icons: " absolute inset-y-0 right-2 flex items-center",
-    options:      " overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
-    option_label: " flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center",
-    option_input: " rounded w-4 h-4 mr-2 dark:checked:bg-blue-500 border border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
-    colors:       " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
+    component:        @class_prefix <> " h-12 flex flex-col w-96 py-[7px] gap-1 relative sm:text-sm",
+    main:             " p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg",
+    tags:             " flex flex-wrap gap-1 w-full",
+    placeholder:      " select-none opacity-50 self-center",
+    tag:              " bg-blue-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
+    main_icons:       " right-2 self-center py-1 pl-1 z-10 flex place-items-center",
+    body:             " hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
+    filter:           " mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+    filter_icons:     " absolute inset-y-0 right-2 flex items-center",
+    icon_color:       " fill-zinc-400 hover:fill-zinc-500",
+    icon_check_color: " fill-zinc-400 hover:fill-zinc-500|fill-blue-600 hover:fill-blue-700", # Two sets of colors `on|off`
+    options:          " overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
+    option_label:     " flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center",
+    option_input:     " rounded w-4 h-4 mr-2 dark:checked:bg-blue-500 border border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
+    colors:           " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
   }
 
   defmacro css(key, add_color_class \\ false) do
     quote do
-      value = unquote(add_color_class) && (@css[unquote(key)] <> @css[:colors]) || @css[unquote(key)]
+      value = if unquote(add_color_class),
+                do:   (@css[unquote(key)] <> @css[:colors]),
+                else: @css[unquote(key)]
       @class_callback.apply_css(unquote(key), value)
     end
   end
 
-  def render(%{selected_count: sel_cnt, option_count: opt_cnt, filtered_count: filt_cnt} = assigns) do
-    hide_filter_icon = opt_cnt == 0 or sel_cnt == 0 or sel_cnt == opt_cnt
+  @doc false
+  def apply_css(_key, value), do: value
+
+  def render(assigns) do
     assigns =
       assigns
-      |> assign(:filter_icon_visibility, hide_filter_icon && "hidden" || "visible")
-      |> assign(:filter_icon_color,
-          (opt_cnt > 0 and sel_cnt == filt_cnt) && "fill-blue-600 hover:fill-blue-700"
-                                                || "fill-zinc-400 hover:fill-zinc-500")
-      |> assign(:filter_icon_title,
-          (opt_cnt > 0 and sel_cnt == filt_cnt) && "Clear filter of selected items"
-                                                || "Filter selected items")
       |> assign(:filter_id, "#{assigns.id}-filter")
 
     assigns[:filter] |> IO.inspect(label: "Filter")
     ~H"""
     <div id={@id} style={} class={build_class([@class, css(:component)])}>
       <div id={"#{@id}-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)}  title={@title}>
-        <div id={"#{@id}-tags"} class={css(:tags)} phx-hook="MultiSelectHook" data-target={@myself} data-wrap={Atom.to_string(@wrap)}>
+        <div id={"#{@id}-tags"} class={css(:tags)} phx-hook="MultiSelectHook"
+             data-target={@myself} data-wrap={Atom.to_string(@wrap)} data-filterside={@filter_side}>
           <%= cond do %>
             <% @selected_count == 0 -> %>
               <span class={css(:placeholder)}><%= @placeholder %></span>
@@ -202,19 +191,14 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
         phx-click-away={toggle_open(@id)}>
         <div class="w-full p-0 relative">
           <div class={css(:filter_icons)}>
-            <.svg type={:check} title={@filter_icon_title} color={@filter_icon_color} on_click="filter" params={[{"icon", "checked"}]} target={@myself}/>
-            <.svg type={:clear} title="Clear Filter" on_click="filter" params={[{"icon", "clear"}]} target={@myself}/>
+            <.svg id={"#{@id}-flt-check"} type={:check} titles={@search_cbox_titles} color={css(:icon_check_color)}
+                  class={@selected_count == 0 && " opacity-20 pointer-events-none" || nil}/>
+            <input name={"#{@id}-flt-check"} type="hidden" value={@filter_checked}>
+            <.svg id={"#{@id}-flt-clear"} type={:clear} title="Clear Filter"/>
           </div>
           <input id={@filter_id} type="text" autocomplete="off" phx-target={@myself} phx-change={JS.set_attribute({'q', :undefined}, to: @filter_id)}
             class={css(:filter, true)}
-            placeholder="Search..." value={@filter}
-            {[] #phx-debounce={@debounce}
-            }
-            {[] #phx-change="search" phx-target={@myself}
-            }
-            {[] #onkeypress={{:safe, "(function(e) { if (e.value == '') e.removeAttribute('name'); else e['name'] = e.id; })(this)"}}
-            }
-            >
+            placeholder={@search_placeholder} value={@filter} phx-debounce={@debounce}>
         </div>
         <div id={"#{@id}-opts"} class={css(:options)}>
           <%=
@@ -225,7 +209,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
                 cursor    = disabled && " cursor-not-allowed" || " cursor-pointer"
             do
           %>
-            <div class="pr-0" hidden={!opt.visible}>
+            <div class="pr-0">
               <label for={id} class={css(:option_label)}
               ><input id={id} name={id} type="checkbox" phx-change="checked" phx-target={@myself}
                       checked={opt.selected} value="on" class={css(:option_input) <> cursor}
@@ -291,23 +275,18 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
           socket
           |> assign(:filter, "")
           |> assign(:filter_checked, false)
-          |> apply_filter(true)
 
         "checked" ->  # `[✓]` icon - toggle showing selected
           case assigns.selected_count do
             0  ->
-              apply_filter(socket)
+              socket
             _  ->
               socket
               |> assign(:filter_checked, not assigns.filter_checked) # Toggle `[✓]` icon
-              |> apply_filter()
           end
       end
     {:noreply, socket}
   end
-
-  @doc false
-  def apply_css(_key, value), do: value
 
   defp set_selected(socket, "all", selected?) do
     {count, options} =
@@ -318,23 +297,16 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     set_selected2(socket, Enum.reverse(options), count, sel_count)
   end
   defp set_selected(%{assigns: assigns} = socket, idx, selected?) do
-    index       = String.to_integer(idx)
-    sel_inc     = selected? && 1 || 0
-    filtered    = assigns.filter_checked
-    has_search  = assigns.filter != nil
-    search_str  = assigns.filter
-    visible     = fn o ->
-      (filtered   and o.id   == index and selected?) or
-      (has_search and o.label =~ search_str)
-    end
+    index   = String.to_integer(idx)
+    sel_inc = selected? && 1 || 0
 
     {count, sel_count, options} =
       Enum.reduce(assigns.options, {0, 0, []}, fn opt, {n, s, acc} ->
         if opt.id == index do
           {n+1, s + sel_inc,
-            [%{opt | selected: selected?, visible: visible.(opt)} | acc]}
+            [%{opt | selected: selected?} | acc]}
         else
-          {n+1, s + (opt.selected && 1 || 0), [%{opt | visible: visible.(opt)} | acc]}
+          {n+1, s + (opt.selected && 1 || 0), [opt | acc]}
         end
       end)
     set_selected2(socket, Enum.reverse(options), count, sel_count)
@@ -348,7 +320,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       |> assign(:selected_count, sel_count)
 
     # Notify LiveView of the changes
-    socket.assigns.selected.(options)
+    chg = socket.assigns.on_change
+    chg && chg.(options)
     {:noreply, socket}
   end
 
@@ -365,16 +338,6 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     |> JS.add_class(class,    to: "##{id}:not(.#{class})")
   end
 
-  defp apply_filter(%{assigns: %{options: options} = assigns} = socket, show_all \\ nil) do
-    show_all = show_all || not assigns.filter_checked
-    fcount   = show_all && assigns.option_count || assigns.selected_count
-    IO.puts("==> ShowAll: #{show_all}, FilterChecked: #{assigns.filter_checked}, FCount: #{fcount}")
-    opts     = for opt <- options, do: %{opt | visible: show_all || opt.selected}
-    socket
-    |> assign(:options, opts)
-    |> assign(:filtered_count, fcount)
-  end
-
   defp disabled(_sel_cnt, _max,      true),                    do: false
   defp disabled(sel_cnt,   max, _selected) when sel_cnt < max, do: false
   defp disabled(_sel_cnt, _max, _selected),                    do: true
@@ -383,30 +346,45 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     Enum.filter(options, fn opt -> opt.selected == true or opt.selected == "true" end)
   end
 
-  defp build_class([]),      do: []
-  defp build_class([nil|t]), do: build_class(t)
-  defp build_class([""|t]),  do: build_class(t)
-  defp build_class([h|t]),   do: "#{h} " <> build_class(t)
+  def build_class([]),   do: ""
+  def build_class([h|t]) when h in [nil, ""], do: build_class(t)
+  def build_class([h|t]) do
+    tail = for i <- t, i, i != "", do: [32, i]
+    IO.iodata_to_binary([h | tail])
+  end
 
+  @doc """
+  Calls a wired up event listener to set a property on a DOM element.
+  Requires this code to be added to app.js:
+    ```
+    window.addEventListener("js:set", e => e.target[e.detail.key] = e.detail.value)
+    ```
+  """
+  def js_set(js \\ %JS{}, to, property, value), do:
+    JS.dispatch(js, "js:set", to: to, detail: %{key: property, value: value})
 
-  attr :type,     :atom,    values:   [:close, :clear, :check, :updown]
-  attr :size,     :string,  default:  "5"
-  attr :color,    :string,  default:  "fill-zinc-400 hover:fill-zinc-500"
-  attr :on_click, :any,     required: true
+  attr :id,       :string,  default: nil
+  attr :type,     :atom,    values:  [:close, :clear, :check, :updown]
+  attr :size,     :string,  default: "5"
+  attr :color,    :string,  default: @css.icon_color
+  attr :on_click, :any,     default: nil
   attr :params,   :list,    default: []
   attr :target,   :integer
   attr :title,    :string,  default: nil
+  attr :titles,   :string,  default: nil
+  attr :class,    :string,  default: nil
 
   defp svg(assigns) do
     size    = assigns[:size]
-    color   = assigns[:color]
-    target  = assigns[:target]
-    rest    = Enum.map(assigns[:params], fn {k,v} -> {"phx-value-#{k}", v} end)
-    rest    = target && [{"phx-target", target} | rest] || rest
+    {c1,c2} = color(assigns[:color] || assigns[:colors])
+    rest    = add([{"phx-target",  assigns[:target]},
+                   {"data-colors", c2},
+                   {"data-titles", assigns[:titles]} |
+                   (for {k,v} <- assigns[:params], do: {"phx-value-#{k}", v})])
     assigns =
       assigns
-      |> assign(:rest,  rest)
-      |> assign(:svg_class, "w-#{size} h-#{size} cursor-pointer #{color}")
+      |> assign(:rest,      rest)
+      |> assign(:svg_class, "w-#{size} h-#{size} cursor-pointer#{c1}#{assigns[:class]}")
       |> assign(:path,
           case assigns.type do
             :close  -> ~S|<path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>|
@@ -415,11 +393,19 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
             :updown -> ~S|<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>|
           end)
     ~H"""
-    <svg class={@svg_class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+    <svg id={@id} class={@svg_class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
       phx-click={@on_click} {@rest}>
-      <title :if={@title}><%= @title %></title>
+      <title><%= @title %></title>
       <%= raw @path %>
     </svg>
     """
   end
+
+  defp color(nil),          do: {nil, nil}
+  defp color({c1,c2}),      do: {" " <> c1, "#{c1}|#{c2}"}
+  defp color(clr),          do: clr =~ "|" && {:binary.split(clr, "|") |> hd, clr} || {clr, nil}
+
+  defp add([]),             do: []
+  defp add([{_, nil} | t]), do: add(t)
+  defp add([kv       | t]), do: [kv | add(t)]
 end

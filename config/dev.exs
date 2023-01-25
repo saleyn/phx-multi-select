@@ -1,15 +1,5 @@
 import Config
 
-# Configure your database
-config :multi_select, MultiSelectExample.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "test",
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
@@ -25,7 +15,7 @@ config :multi_select, MultiSelectExampleWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "VNdcFh87X4RaUQfnQzvHQ/Yd84gI+RQbqkUILK+hmcIfIvC8V4sGnhKBcaEJM7CN",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    esbuild:  {Esbuild,  :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
