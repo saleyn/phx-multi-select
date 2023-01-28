@@ -41,7 +41,7 @@ defmodule MultiSelectExample.MixProject do
       {:gettext,             "~> 0.20"},
       {:jason,               "~> 1.2"},
       {:plug_cowboy,         "~> 2.5"},
-      {:multi_select, path: ".."},
+      {:multi_select,  path: "../"},
     ]
   end
 

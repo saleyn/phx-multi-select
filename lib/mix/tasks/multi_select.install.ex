@@ -52,7 +52,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
     if File.exists?(path) do
       IO.puts("==> File #{path} is already installed")
     else
-      File.cp!("deps/multi_select/assets/${file}", path)
+      File.cp!("#{Mix.Project.deps_paths()[:multi_select]}/assets/#{file}", path)
     end
 
     index = "assets/js/hooks/index.js"

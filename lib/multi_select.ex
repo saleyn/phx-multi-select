@@ -1,7 +1,29 @@
 defmodule Phoenix.LiveView.Components.MultiSelect do
+  @moduledoc """
+  Multi-select component for Phoenix LiveView.
+
+  Use in your HEEX templates with:
+  ```
+  <.multi_select
+    id="multi"
+    options={
+      %{id: 1, label: "One"},
+      %{id: 2, label: "Two"},
+    }
+  >
+  ```
+
+  See `multi_select/1` for details.
+  """
   use    Phoenix.LiveComponent
   import Phoenix.HTML
   alias  Phoenix.LiveView.JS
+
+  def __using__(_) do
+    quote do
+      import Phoenix.LiveView.Components.MultiSelect, only: [multi_select: 1]
+    end
+  end
 
   defmodule Option do
     @doc """
