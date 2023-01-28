@@ -34,7 +34,10 @@ defmodule MultiSelect.MixProject do
     [
       # These are the default files included in the package
       licenses: ["BSD"],
-      links:    %{"GitHub" => "https://github.com/saleyn/phx-multi-select"}
+      links:    %{"GitHub" => "https://github.com/saleyn/phx-multi-select"},
+      files:    ~w(lib assets mix.exs Makefile README* LICENSE* CHANGELOG*
+        example/assets example/config example/lib example/Makefile
+        example/mix.exs example/priv/gettext example/README* example/test)
     ]
   end
 
