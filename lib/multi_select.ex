@@ -244,7 +244,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     """
   end
 
-  def handle_event("validate", %{"_target" => [target]} = params, %{assigns: %{id: id}} = socket) do
+  def handle_event("validate", %{"_target" => [_target]}, socket) do
     {:noreply, socket}
   end
   def handle_event("validate", %{"_target" => ["undefined"]}, socket) do

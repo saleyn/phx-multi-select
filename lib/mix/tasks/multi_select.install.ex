@@ -41,7 +41,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
           case Regex.run(~r/\n(\s*)content:\s*\[([^\]]+)/, str, return: :index) do
             [{s1n, s1m}, {_, indent_wid}, {s2n, s2m}] ->
               {s1, _} = String.split_at(str, s1n+s1m-s2m)
-              {s2, s3} = String.split_at(str, s2n+s2m)
+              {_, s3} = String.split_at(str, s2n+s2m)
               content =
                 str
                 |> String.slice(s2n, s2m)
