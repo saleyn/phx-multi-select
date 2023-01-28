@@ -20,5 +20,5 @@ defmodule MultiSelectExampleWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :multi_select
+  use Gettext, otp_app: :multi_select_example
 end

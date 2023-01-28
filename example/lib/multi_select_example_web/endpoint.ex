@@ -1,5 +1,5 @@
 defmodule MultiSelectExampleWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :multi_select
+  use Phoenix.Endpoint, otp_app: :multi_select_example
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
@@ -19,7 +19,7 @@ defmodule MultiSelectExampleWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :multi_select,
+    from: :multi_select_example,
     gzip: false,
     only: MultiSelectExampleWeb.static_paths()
 
