@@ -3,19 +3,20 @@ defmodule MultiSelect.MixProject do
 
   def project do
     [
-      app: :phoenix_multi_select,
-      version: "0.1.0",
-      elixir: "~> 1.14",
+      app:           :phoenix_multi_select,
+      version:       "0.1.0",
+      elixir:        "~> 1.14",
       elixirc_paths: ["lib"],
-      deps: deps(),
+      deps:          deps(),
+      package:       package(),
 
       # Docs
-      name: "MultiSelect",
+      name:         "MultiSelect",
       homepage_url: "http://github.com/saleyn/phx-multi-select",
-      authors: ["Serge Aleynikov"],
-      docs: [
-        main: "Phoenix.LiveView.Components.MultiSelect", # The main page in the docs
-        extras: ["README.md"]
+      authors:      ["Serge Aleynikov"],
+      docs:         [
+        main:       "Phoenix.LiveView.Components.MultiSelect", # The main page in the docs
+        extras:     ["README.md"]
       ],
     ]
   end
@@ -33,14 +34,14 @@ defmodule MultiSelect.MixProject do
     [
       # These are the default files included in the package
       licenses: ["BSD"],
-      links: %{"GitHub" => "https://github.com/saleyn/phx-multi-select"}
+      links:    %{"GitHub" => "https://github.com/saleyn/phx-multi-select"}
     ]
   end
 
   # Specifies your project dependencies.
   defp deps do
     [
-      {:phoenix,             "~> 1.7.0-rc.0"},
+      {:phoenix,             "~> 1.6"},
       {:phoenix_html,        "~> 3.0"},
       {:phoenix_live_view,   "~> 0.18"},
       {:ex_doc,              "~> 0.19", only: :dev, runtime: false},
