@@ -34,4 +34,4 @@ cd examples
 make
 make run
 ```
-Now you can visit [`localhost:4002`](http://localhost:4002) from your browser.
+Now you can visit [`localhost:4002`](http://localhost:4000) from your browser.

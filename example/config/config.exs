@@ -8,7 +8,7 @@
 import Config
 
 # Configures the endpoint
-config :multi_select, MultiSelectExampleWeb.Endpoint,
+config :multi_select_example, MultiSelectExampleWeb.Endpoint,
   url: [host: "localhost"],
   render_errors: [
     formats: [html: MultiSelectExampleWeb.ErrorHTML, json: MultiSelectExampleWeb.ErrorJSON],
