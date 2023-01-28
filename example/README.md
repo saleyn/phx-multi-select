@@ -1,16 +1,17 @@
 # Phoenix LiveView MultiSelect Component
 
-This project implements an Elixir Phoenix LiveView component that has a capability
-of selecting multiple checkboxed items from a list.
+This is a sample project that illustrates the Phoenix LiveView `multi_select` component
 
-To start your Phoenix server:
+See [multi_select](https://github.com/saleyn/phx-multi-select).
 
-  * Run `make` to build the project
-  * Start Phoenix endpoint inside IEx with `make run` or outside with `mix phx.server`
+## Install, Build, and Run
 
-Now you can visit [`localhost:4002`](http://localhost:4002) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+```bash
+$ git clone https://github.com/saleyn/phx-multi-select.git
+$ cd example
+$ make
+$ make run
+```
 
 ## Learn more
 

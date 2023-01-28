@@ -59,7 +59,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     * `:debounce` - the integer controlling a `phx-debounce` value for the
       search input
 
-    * `:options` - a required list of `%{id: any(), label: string()}` maps to
+    * `:options` - a required list of `%{id: any(), label: string()}` options to
       select from
 
     * `:form` - the required form name owning this component
@@ -180,7 +180,6 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       assigns
       |> assign(:filter_id, "#{assigns.id}-filter")
 
-    assigns[:filter] |> IO.inspect(label: "Filter")
     ~H"""
     <div id={@id} style={} class={build_class([@class, css(:component)])}>
       <div id={"#{@id}-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)}  title={@title}>
@@ -204,7 +203,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
           <% end %>
         </div>
         <div class={css(:main_icons)}>
-          <.svg type={:clear} :if={@selected_count > 1 and @selected_count <= @cur_shown}
+          <.svg type={:clear} :if={@selected_count > 1}
             title="Clear all selected items" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
           <.svg type={:updown} size="6" on_click={toggle_open(@id)}/>
         </div>
@@ -245,10 +244,6 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   def handle_event("validate", %{"_target" => [target]} = params, %{assigns: %{id: id}} = socket) do
-    case id <> "-filter" do
-      ^target ->
-        params |> IO.inspect(label: "Validate")
-    end
     {:noreply, socket}
   end
   def handle_event("validate", %{"_target" => ["undefined"]}, socket) do

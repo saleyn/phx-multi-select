@@ -1,13 +1,22 @@
-all: deps assets/node_modules priv/static/assets/app.js compile
+all: multi_select.install assets/node_modules priv/static/assets/app.js compile
+
+compile: deps.get
+	mix $@
+
+deps.get: deps
+	mix $@
 
 deps:
-	mix deps.get
+	mkdir -p $@
 
-compile: deps
+multi_select.install: deps.get assets/js/hooks/multi-select-hook.js
 	mix $@
 
 clean:
 	rm -fr _build assets/node_modules priv/static/assets/app*
+
+distclean: clean
+	rm -fr deps priv/static
 
 run: assets/node_modules
 	iex -S mix phx.server
