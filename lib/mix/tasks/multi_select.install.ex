@@ -19,22 +19,77 @@ defmodule Mix.Tasks.MultiSelect.Install do
   end
 
   defp modify_tailwind_cfg() do
-    tailwind_cfg_file = "assets/tailwind.config.js"
-    tailwind_cfg =
-      case File.exists?(tailwind_cfg_file) do
-        true  -> File.read!(tailwind_cfg_file)
-        false -> File.write!(tailwind_cfg_file, new_tailwind_cfg())
-      end
-    if tailwind_cfg =~ ~r/colors:\s*\{[^p]+primary:\s*[^,]+,/ do
-      IO.puts("==> File #{tailwind_cfg_file} doesn't require modifications")
+    file = "assets/tailwind.config.js"
+
+    if not File.exists?(file) do
+      File.write!(file, new_tailwind_cfg())
+      IO.puts("==> File #{file} created")
     else
-      {tailwind_cfg, tailwind_cfg_file}
-      |> add_theme()
-      |> add_extend()
-      |> add_colors()
-      |> add_primary()
+      tailwind_cfg = File.read!(file)
+      ## Add the "../deps/phx_multi_select/lib/*.ex" string to the `content` section
+      str =
+        if tailwind_cfg =~ content_mask() do
+          tailwind_cfg
+        else
+          {str, module_exports_offset} =
+            case Regex.run(~r/^module\.exports\s*=\s*\{\n*/m, tailwind_cfg, return: :index) do
+              [offset] ->
+                {tailwind_cfg, offset}
+              nil ->
+                raise RuntimeError, message: "Cannot find 'module.exports = {...}' in #{file}"
+            end
+          case Regex.run(~r/\n(\s*)content:\s*\[([^\]]+)/, str, return: :index) do
+            [{s1n, s1m}, {_, indent_wid}, {s2n, s2m}] ->
+              {s1, _} = String.split_at(str, s1n+s1m-s2m)
+              {s2, s3} = String.split_at(str, s2n+s2m)
+              content =
+                str
+                |> String.slice(s2n, s2m)
+                |> then(& Regex.replace(~r/[ ,\n]+$/, &1, ""))
+                |> then(& &1 == "" && &1 || &1 <> ",")
+                |> then(& """
+                    #{&1}
+                    #{String.duplicate(" ", indent_wid*2)}#{content_mask()},
+                    """)
+              s1 <> content <> String.duplicate(" ", indent_wid) <> s3
+            _ ->
+              {s1, s2} = String.split_at(str, elem(module_exports_offset, 0)+elem(module_exports_offset, 1))
+              s1 <> content_str() <> s2
+          end
+        end
+      ## Add the `primary` custom color
+      str =
+        if str =~ ~r/colors:\s*\{[^p]+primary:\s*[^,]+,/ do
+          str
+        else
+          {str, file}
+          |> add_theme()
+          |> add_extend()
+          |> add_colors()
+          |> add_primary()
+        end
+
+      if str == tailwind_cfg do
+        IO.puts("==> File #{file} doesn't require modifications")
+      else
+        File.write!(file, str)
+        IO.puts("==> Added definition of primary color to #{file}")
+      end
     end
   end
+
+  defp content_str() do
+    """
+      content: [
+        "./js/**/*.js",
+        "../lib/*_web.ex",
+        "../lib/*_web/**/*.*ex",
+        #{content_mask()}
+      ],
+    """
+  end
+
+  defp content_mask(), do: "\"../deps/phx_multi_select/lib/*.ex\""
 
   defp modify_npm_cfg() do
     file = "assets/package.json"
@@ -122,7 +177,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
     end
   end
 
-  defp add_primary({str, file, {_, indent_wid}, {n, m} = _colors_idx}) do
+  defp add_primary({str, _file, {_, indent_wid}, {n, m} = _colors_idx}) do
     case Regex.run(~r/\n(\s*)primary:\s*[^,]+,/, str, return: :index) do
       [_idx, _indent_idx] ->
         str
@@ -131,17 +186,14 @@ defmodule Mix.Tasks.MultiSelect.Install do
         indent   = String.duplicate(" ", indent_wid)
         res      = s1 <> "\n" <> String.duplicate(indent, 3) <> "primary: colors.blue,\n"
                       <> String.trim_leading(s2, "\n")
-        res      =
-          if (res =~ "require(\"tailwindcss/colors\")") do
-            res
-          else
-            [{offset, _}|_] = Regex.run(~r/module.exports/, res, return: :index)
-            {s1, s2} = String.split_at(res, offset)
-            res = s1 <> "const colors = require(\"tailwindcss/colors\")\n" <> s2
-            res
-          end
-        File.write!(file, res)
-        IO.puts("==> Added definition of primary color to #{file}")
+        if (res =~ "require(\"tailwindcss/colors\")") do
+          res
+        else
+          [{offset, _}|_] = Regex.run(~r/module.exports/, res, return: :index)
+          {s1, s2} = String.split_at(res, offset)
+          res = s1 <> "const colors = require(\"tailwindcss/colors\")\n" <> s2
+          res
+        end
     end
   end
 
@@ -154,7 +206,8 @@ defmodule Mix.Tasks.MultiSelect.Install do
       content: [
         "./js/**/*.js",
         "../lib/*_web.ex",
-        "../lib/*_web/**/*.*ex"
+        "../lib/*_web/**/*.*ex",
+        #{content_mask()},
       ],
       theme: {
         extend: {

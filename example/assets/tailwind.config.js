@@ -8,7 +8,8 @@ module.exports = {
   content: [
     "./js/**/*.js",
     "../lib/*_web.ex",
-    "../lib/*_web/**/*.*ex"
+    "../lib/*_web/**/*.*ex",
+    "../deps/phx_multi_select/lib/*.ex"
   ],
   theme: {
     extend: {

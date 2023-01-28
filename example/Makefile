@@ -7,7 +7,7 @@ compile: deps
 	mix $@
 
 clean:
-	rm -fr _build
+	rm -fr _build assets/node_modules priv/static/assets/app*
 
 run: assets/node_modules
 	iex -S mix phx.server
