@@ -12,6 +12,7 @@ defmodule MultiSelect.MixProject do
 
       # Docs
       name:         "MultiSelect",
+      description:  "A MultiSelect component for Phoenix LiveView",
       homepage_url: "http://github.com/saleyn/phx-multi-select",
       authors:      ["Serge Aleynikov"],
       docs:         [
