@@ -139,10 +139,10 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
   ## This setting allows to customize CSS classes. It supposed to return the
   ## module that has `apply_css(key, css_classes) -> css_classes :: String.t` function.
-  @class_callback Application.compile_env(:live_view, :multi_select, %{})[:class_callback] || __MODULE__
+  @class_callback Application.compile_env(:live_view, :phoenix_multi_select, %{})[:class_module] || __MODULE__
 
   ## Customize the class name shared by the outer div
-  @class_prefix   Application.compile_env(:live_view, :multi_select, %{})[:class_prefix]   || "phx-msel"
+  @class_prefix   Application.compile_env(:live_view, :phoenix_multi_select, %{})[:class_prefix]   || "phx-msel"
 
   ## Metadata with all CSS attributes for the MultiSelect component
   @css %{
@@ -150,16 +150,16 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     main:             " p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg",
     tags:             " flex flex-wrap gap-1 w-full",
     placeholder:      " select-none opacity-50 self-center",
-    tag:              " bg-blue-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
+    tag:              " bg-primary-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
     main_icons:       " right-2 self-center py-1 pl-1 z-10 flex place-items-center",
     body:             " hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
     filter:           " mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
     filter_icons:     " absolute inset-y-0 right-2 flex items-center",
     icon_color:       " fill-zinc-400 hover:fill-zinc-500",
-    icon_check_color: " fill-zinc-400 hover:fill-zinc-500|fill-blue-600 hover:fill-blue-700", # Two sets of colors `on|off`
+    icon_check_color: " fill-zinc-400 hover:fill-zinc-500|fill-primary-600 hover:fill-primary-700", # Two sets of colors `on|off`
     options:          " overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
     option_label:     " flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center",
-    option_input:     " rounded w-4 h-4 mr-2 dark:checked:bg-blue-500 border border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
+    option_input:     " rounded w-4 h-4 mr-2 dark:checked:bg-primary-500 border border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
     colors:           " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
   }
 
@@ -180,6 +180,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       assigns
       |> assign(:filter_id, "#{assigns.id}-filter")
 
+    assigns[:selected_count] |> IO.inspect(label: "SelectedCount")
     ~H"""
     <div id={@id} style={} class={build_class([@class, css(:component)])}>
       <div id={"#{@id}-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)}  title={@title}>

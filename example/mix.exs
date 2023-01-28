@@ -30,18 +30,18 @@ defmodule MultiSelectExample.MixProject do
   # Specifies your project dependencies.
   defp deps do
     [
-      {:phoenix,             "~> 1.7.0-rc.2", override: true},
-      {:phoenix_html,        "~> 3.0"},
-      {:phoenix_live_reload, "~> 1.2",        only: :dev},
-      {:phoenix_live_view,   "~> 0.18.3"},
-      {:heroicons,           "~> 0.5"},
-      {:esbuild,             "~> 0.5",    runtime: Mix.env() == :dev},
-      {:tailwind,            "~> 0.1.8",  runtime: Mix.env() == :dev},
-      {:faker,               "~> 0.17",   runtime: false},
-      {:gettext,             "~> 0.20"},
-      {:jason,               "~> 1.2"},
-      {:plug_cowboy,         "~> 2.5"},
-      {:phx_multi_select,    git: "https://github.com/saleyn/phx-multi-select.git", branch: "main"},
+      {:phoenix,              "~> 1.7.0-rc.2", override: true},
+      {:phoenix_html,         "~> 3.0"},
+      {:phoenix_live_reload,  "~> 1.2",        only: :dev},
+      {:phoenix_live_view,    "~> 0.18.3"},
+      {:heroicons,            "~> 0.5"},
+      {:esbuild,              "~> 0.5",    runtime: Mix.env() == :dev},
+      {:tailwind,             "~> 0.1.8",  runtime: Mix.env() == :dev},
+      {:faker,                "~> 0.17",   runtime: false},
+      {:gettext,              "~> 0.20"},
+      {:jason,                "~> 1.2"},
+      {:plug_cowboy,          "~> 2.5"},
+      {:phoenix_multi_select, git: "https://github.com/saleyn/phx-multi-select.git", branch: "main"},
     ]
   end
 

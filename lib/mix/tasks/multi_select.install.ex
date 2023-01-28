@@ -26,7 +26,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
       IO.puts("==> File #{file} created")
     else
       tailwind_cfg = File.read!(file)
-      ## Add the "../deps/phx_multi_select/lib/*.ex" string to the `content` section
+      ## Add the "../deps/phoenix_multi_select/lib/*.ex" string to the `content` section
       str =
         if tailwind_cfg =~ content_mask() do
           tailwind_cfg
@@ -70,7 +70,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
         end
 
       if str == tailwind_cfg do
-        IO.puts("==> File #{file} doesn't require modifications")
+        out("==> File #{file} doesn't require modifications")
       else
         File.write!(file, str)
         IO.puts("==> Added definition of primary color to #{file}")
@@ -89,15 +89,15 @@ defmodule Mix.Tasks.MultiSelect.Install do
     """
   end
 
-  defp content_mask(), do: "\"../deps/phx_multi_select/lib/*.ex\""
+  defp content_mask(), do: "\"../deps/phoenix_multi_select/lib/*.ex\""
 
   defp modify_npm_cfg() do
     file = "assets/package.json"
     if File.exists?(file) and (File.read!(file) =~ "tailwind-scrollbar") do
-      IO.puts("==> File #{file} doesn't require modifications")
+      out("==> File #{file} doesn't require modifications")
     else
       {_, 0} = System.cmd("npm", ~w(install -D tailwind-scrollbar), cd: "assets")
-      IO.puts("==> Add tailwind-scrollbar NPM dev package")
+      IO.puts("==> Added tailwind-scrollbar NPM dev package")
     end
   end
 
@@ -105,7 +105,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
     file = "multi-select-hook.js"
     path = "assets/js/hooks/#{file}"
     if File.exists?(path) do
-      IO.puts("==> File #{path} is already installed")
+      out("==> File #{path} is already installed")
     else
       File.cp!("#{Mix.Project.deps_paths()[:multi_select]}/assets/#{file}", path)
     end
@@ -137,7 +137,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
         File.write!(index, str)
         IO.puts("==> File #{index} modified")
       else
-        IO.puts("==> File #{index} doesn't require modifications")
+        out("==> File #{index} doesn't require modifications")
       end
     end
   end
@@ -224,4 +224,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
     }
     """
   end
+
+  defp out(str), do:
+    (System.get_env("DEBUG", "0") |> String.to_integer() > 0) && IO.puts(str)
 end
