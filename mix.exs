@@ -7,7 +7,16 @@ defmodule MultiSelect.MixProject do
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: ["lib"],
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      name: "MultiSelect",
+      homepage_url: "http://github.com/saleyn/phx-multi-select",
+      authors: ["Serge Aleynikov"],
+      docs: [
+        main: "Phoenix.LiveView.Components.MultiSelect", # The main page in the docs
+        extras: ["README.md"]
+      ],
     ]
   end
 
@@ -25,7 +34,8 @@ defmodule MultiSelect.MixProject do
     [
       {:phoenix,             "~> 1.7.0-rc.0", override: true},
       {:phoenix_html,        "~> 3.0"},
-      {:phoenix_live_view,   "~> 0.18.3"},
+      {:phoenix_live_view,   "~> 0.18"},
+      {:ex_doc,              "~> 0.19", only: :dev, runtime: false},
     ]
   end
 end

@@ -27,7 +27,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
   defmodule Option do
     @doc """
-    The option struct is passed to
+    The option struct can be used for passing a list of option values to the
+    `multi_select` component.
     """
     defstruct \
       id:       nil,
@@ -102,10 +103,15 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     """
   end
 
+  @doc """
+  Call this function to notify the LiveView to update the settings of the
+  multi_select component identified by the `id`.
+  """
   def update_settings(id, attrs) when is_list(attrs) do
     send_update(__MODULE__, [{:id, id} | attrs])
   end
 
+  @doc false
   def mount(%{assigns: assigns} = socket) do
     assigns =
       assigns
@@ -117,6 +123,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     {:ok, Map.put(socket, :assigns, assigns)}
   end
 
+  @doc false
   def update(%{options: options} = assigns, socket) do
     socket =
       socket
@@ -163,6 +170,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     colors:           " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
   }
 
+  @doc false
   defmacro css(key, add_color_class \\ false) do
     quote do
       value = if unquote(add_color_class),
@@ -175,6 +183,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   @doc false
   def apply_css(_key, value), do: value
 
+  @doc false
   def render(assigns) do
     assigns =
       assigns
@@ -243,6 +252,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     """
   end
 
+  @doc false
   def handle_event("validate", %{"_target" => [_target]}, socket) do
     {:noreply, socket}
   end
@@ -363,22 +373,13 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     Enum.filter(options, fn opt -> opt.selected == true or opt.selected == "true" end)
   end
 
+  @doc false
   def build_class([]),   do: ""
   def build_class([h|t]) when h in [nil, ""], do: build_class(t)
   def build_class([h|t]) do
     tail = for i <- t, i, i != "", do: [32, i]
     IO.iodata_to_binary([h | tail])
   end
-
-  @doc """
-  Calls a wired up event listener to set a property on a DOM element.
-  Requires this code to be added to app.js:
-    ```
-    window.addEventListener("js:set", e => e.target[e.detail.key] = e.detail.value)
-    ```
-  """
-  def js_set(js \\ %JS{}, to, property, value), do:
-    JS.dispatch(js, "js:set", to: to, detail: %{key: property, value: value})
 
   attr :id,       :string,  default: nil
   attr :type,     :atom,    values:  [:close, :clear, :check, :updown]
