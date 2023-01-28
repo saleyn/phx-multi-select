@@ -3,7 +3,7 @@ defmodule MultiSelectExample.MixProject do
 
   def project do
     [
-      app: :multi_select,
+      app: :multi_select_example,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -41,13 +41,13 @@ defmodule MultiSelectExample.MixProject do
       {:gettext,             "~> 0.20"},
       {:jason,               "~> 1.2"},
       {:plug_cowboy,         "~> 2.5"},
-      {:multi_select,  path: "../"},
+      {:phx_multi_select,    git: "https://github.com/saleyn/phx-multi-select.git", branch: "main"},
     ]
   end
 
   defp aliases do
     [
-      setup: ["deps.get"],
+      setup: ["deps.get", "assets.deploy"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
     ]
   end

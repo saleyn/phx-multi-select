@@ -12,8 +12,6 @@ defmodule MultiSelectExample.Application do
       {Phoenix.PubSub, name: MultiSelectExample.PubSub},
       # Start the Endpoint (http/https)
       MultiSelectExampleWeb.Endpoint
-      # Start a worker by calling: MultiSelectExample.Worker.start_link(arg)
-      # {MultiSelectExample.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

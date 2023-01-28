@@ -1,4 +1,4 @@
-all: deps assets/node_modules compile
+all: deps assets/node_modules priv/static/assets/app.js compile
 
 deps:
 	mix deps.get
@@ -14,6 +14,9 @@ run: assets/node_modules
 
 assets/node_modules:
 	cd assets && npm install
+
+priv/static/assets/app.js:
+	mix assets.deploy
 
 shell:
 	iex -S mix phx.server --no-start

@@ -3,7 +3,7 @@ defmodule MultiSelect.MixProject do
 
   def project do
     [
-      app: :multi_select,
+      app: :phx_multi_select,
       version: "0.1.0",
       elixir: "~> 1.14",
       elixirc_paths: ["lib"],
