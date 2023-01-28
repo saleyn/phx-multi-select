@@ -13,8 +13,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        brand: "#FD4F00",
         primary: colors.blue,
+        brand: "#FD4F00",
       }
     },
   },

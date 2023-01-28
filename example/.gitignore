@@ -1,19 +1,14 @@
 # The directory Mix will write compiled artifacts to.
-/.elixir_ls/
-/example/.elixir_ls/
 /_build/
-/example/_build/
 
 # If you run "mix test --cover", coverage assets end up here.
 /cover/
 
 # The directory Mix downloads your dependencies sources to.
 /deps/
-/example/deps/
 
 # Where 3rd-party dependencies like ExDoc output generated docs.
 /doc/
-/examples/doc/
 
 # Ignore .fetch files in case you like to edit your project deps locally.
 /.fetch
@@ -32,17 +27,9 @@ multi_select-*.tar
 /priv/static/assets/
 /priv/static/robots*
 
-/example/priv/static/
-/example/priv/static/assets/
-/example/priv/static/robots*
-
 # Ignore digested assets cache.
 /priv/static/cache_manifest.json
 
 # In case you use Node.js/npm, you want to ignore these.
 npm-debug.log
-/example/assets/node_modules/
-/example/assets/js/hooks/multi-select-hook.js
-
-.dockerignore
-Dockerfile
+/assets/node_modules/

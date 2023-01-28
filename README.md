@@ -5,19 +5,33 @@ of selecting multiple checkboxed items from a list.
 
 ![Example](https://user-images.githubusercontent.com/272543/214661918-110505f2-e796-40e3-a1ee-47178cb0daba.png)
 
-To start your Phoenix server:
+## Installation
 
-  * Run `make` to build the project
-  * Start Phoenix endpoint inside IEx with `make run` or outside with `mix phx.server`
+Include the project in the `mix.exs` as a dependency:
+```
+defp deps do
+  [
+    {:multi_select, "~> 0.0"},
+    ...
+  ]
+```
 
+Run `mix deps.get`, and `mix multi_select.install`. This will modify the following
+files:
+
+- `assets/tailwind.config.js` - to add the necessary color alias
+- `assets/package.json` - to add the tailwind scrollbar customization
+- `assets/js/hooks/multi-select-hook.js` - copied from the multi_select source
+- `assets/js/hooks/index.js` - add the MultiSelectHook
+
+## Demo
+
+The demo project is located in the `examples/` directory, and can be compiled
+and run with:
+
+```
+cd examples
+make
+make run
+```
 Now you can visit [`localhost:4002`](http://localhost:4002) from your browser.
-
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
-
-## Learn more
-
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix

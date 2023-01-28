@@ -1,4 +1,6 @@
-import JS from "../../../deps/phoenix_live_view/assets/js/phoenix_live_view/js"
+// Multi Select Hook
+// =================
+// Phoenix LiveView hook for the multi_select live component
 
 const MultiSelectHook = {
   wasWrapped: false,
@@ -20,6 +22,7 @@ const MultiSelectHook = {
 
     this.filterClearIcon().onclick = (obj) => {
       this.filter.value = ''
+      this.applyFilter(this, false)
       if (this.el.dataset.filterside == 'server')
         this.pushEventTo(this.el.dataset.target, 'filter', {icon: 'clear'})
     }
@@ -123,15 +126,5 @@ const MultiSelectHook = {
     return hasChecks
   }
 }
-
-// >>> START Global Event Listeners
-window.addEventListener("js:exec", e => e.target[e.detail.call](...e.detail.args))
-window.addEventListener("js:set",  e => e.target[e.detail.key] = e.detail.value)
-window.addEventListener("js:set_input_value", e => e.target.value = e.detail)
-window.addEventListener("js:ignore_empty_input", e => {
-  let t = e.target
-  if (t.value == "") t.name = t.id; else t.removeAttribute('name');
-})
-// <<< END Global Event Listeners
 
 export default MultiSelectHook
