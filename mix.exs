@@ -23,7 +23,7 @@ defmodule MultiSelect.MixProject do
   # Specifies your project dependencies.
   defp deps do
     [
-      {:phoenix,             "~> 1.7.0-rc.2", override: true},
+      {:phoenix,             "~> 1.7.0-rc.0", override: true},
       {:phoenix_html,        "~> 3.0"},
       {:phoenix_live_view,   "~> 0.18.3"},
     ]
