@@ -29,10 +29,18 @@ defmodule MultiSelect.MixProject do
     ]
   end
 
+  defp package() do
+    [
+      # These are the default files included in the package
+      licenses: ["BSD"],
+      links: %{"GitHub" => "https://github.com/saleyn/phx-multi-select"}
+    ]
+  end
+
   # Specifies your project dependencies.
   defp deps do
     [
-      {:phoenix,             "~> 1.7.0-rc.0", override: true},
+      {:phoenix,             "~> 1.7.0-rc.0"},
       {:phoenix_html,        "~> 3.0"},
       {:phoenix_live_view,   "~> 0.18"},
       {:ex_doc,              "~> 0.19", only: :dev, runtime: false},
