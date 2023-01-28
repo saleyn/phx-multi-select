@@ -14,6 +14,8 @@ collapse them in a single tag
 - Ability to search in the list of options on the client side or on the server
 side
 
+Here's a sample [video]() illustrating what this component looks like in action.
+
 ## Author
 
 Serge Aleynikov

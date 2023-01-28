@@ -180,7 +180,6 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       assigns
       |> assign(:filter_id, "#{assigns.id}-filter")
 
-    assigns[:selected_count] |> IO.inspect(label: "SelectedCount")
     ~H"""
     <div id={@id} style={} class={build_class([@class, css(:component)])}>
       <div id={"#{@id}-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)}  title={@title}>
