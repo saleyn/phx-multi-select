@@ -15,7 +15,7 @@ collapse them in a single tag
 side
 - Support of light/dark color themes
 
-Here's a sample [video](https://user-images.githubusercontent.com/272543/215292190-7932a617-10d4-437a-8ab5-5181461c2c38.mp4) illustrating what this component looks like in action.
+Here's a sample [video](https://user-images.githubusercontent.com/272543/215292190-7932a617-10d4-437a-8ab5-5181461c2c38.mp4) illustrating what this component looks like in action. NOTE: this video link may only work on a desktop computer, but not on a mobile phone.  We are looking into it.
 
 This component is inspired by [this article](https://fly.io/phoenix-files/liveview-multi-select) but is a complete rewrite with added features for
 usability.
