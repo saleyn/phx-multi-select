@@ -39,7 +39,7 @@ defmodule MultiSelectExampleWeb.SampleData do
           end,
         topics:    (for i <- topic_ids, do: @topics_map[i]),
         topic_ids: MapSet.new(topic_ids),
-        image:     Faker.Avatar.image_url()
+        image:     "https://robohash.org/set_set4/#{Faker.Lorem.characters(1..10)}.png"
       }
     end)
 
