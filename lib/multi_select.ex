@@ -154,31 +154,35 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   ## Metadata with all CSS attributes for the MultiSelect component
   @css %{
     component:        @class_prefix <> " h-12 flex flex-col w-96 py-[7px] gap-1 relative sm:text-sm",
-    main:             " p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg",
-    tags:             " flex flex-wrap gap-1 w-full",
-    placeholder:      " select-none opacity-50 self-center",
-    tag:              " bg-primary-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
-    main_icons:       " right-2 self-center py-1 pl-1 z-10 flex place-items-center",
-    body:             " hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
-    filter:           " mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-    filter_icons:     " absolute inset-y-0 right-2 flex items-center",
-    icon_color:       " fill-zinc-400 hover:fill-zinc-500",
-    icon_check_color: " fill-zinc-400 hover:fill-zinc-500|fill-primary-600 hover:fill-primary-700", # Two sets of colors `on|off`
-    options:          " overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
-    option_label:     " flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center",
-    option_input:     " rounded w-4 h-4 mr-2 dark:checked:bg-primary-500 border border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
-    colors:           " bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
+    main:             "p-2 flex w-full gap-1 min-h-fit border rounded-t-lg rounded-b-lg",
+    tags:             "flex flex-wrap gap-1 w-full",
+    placeholder:      "select-none opacity-50 self-center",
+    tag:              "bg-primary-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
+    main_icons:       "right-2 self-center py-1 pl-1 z-10 flex place-items-center",
+    body:             "hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
+    filter:           "mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+    filter_icons:     "absolute inset-y-0 right-2 flex items-center",
+    icon_color:       "fill-zinc-400 hover:fill-zinc-500",
+    icon_check_color: "fill-zinc-400 hover:fill-zinc-500 | fill-primary-600 hover:fill-primary-700", # Two sets of colors `on|off`
+    options:          "overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
+    option_label:     "flex text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center",
+    option_input:     "rounded w-4 h-4 mr-2 dark:checked:bg-primary-500 border border-gray-300 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600 transition duration-200",
+    colors:           "bg-white border-gray-300 dark:border-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:disabled:bg-gray-700",
   }
 
   @doc false
   defmacro css(key, add_color_class \\ false) do
     quote do
-      value = if unquote(add_color_class),
-                do:   (@css[unquote(key)] <> @css[:colors]),
-                else: @css[unquote(key)]
+      value =
+        unquote(key)
+        |> unquote(__MODULE__).css_fetch(unquote(add_color_class))
       @class_callback.apply_css(unquote(key), value)
     end
   end
+
+  @doc false
+  def css_fetch(k, true),  do: [@css[k], @css[:colors]] |> build_class()
+  def css_fetch(k, false), do: [@css[k]]                |> build_class()
 
   @doc false
   def apply_css(_key, value), do: value
@@ -191,8 +195,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
     ~H"""
     <div id={@id} style={} class={build_class([@class, css(:component)])}>
-      <div id={"#{@id}-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)}  title={@title}>
-        <div id={"#{@id}-tags"} class={css(:tags)} phx-hook="MultiSelectHook"
+      <div id={@id <> "-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)} title={@title}>
+        <div id={@id <> "-tags"} class={css(:tags)} phx-hook="MultiSelectHook"
              data-target={@myself} data-wrap={Atom.to_string(@wrap)} data-filterside={@filter_side}>
           <%= cond do %>
             <% @selected_count == 0 -> %>
@@ -214,7 +218,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
         <div class={css(:main_icons)}>
           <.svg type={:clear} :if={@selected_count > 1}
             title="Clear all selected items" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
-          <.svg type={:updown} size="6" on_click={toggle_open(@id)}/>
+          <.svg id={@id <> "-updown-icon"} type={:updown} size="6"/>
         </div>
       </div>
       <div id={"#{@id}-dropdown"} tabindex="0" class={css(:body, true)}
@@ -374,10 +378,13 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   @doc false
-  def build_class([]),   do: ""
-  def build_class([h|t]) when h in [nil, ""], do: build_class(t)
+  def build_class(str)   when is_binary(str),         do: str
+  def build_class([]),                                do: ""
+  def build_class([h|t]) when h in [nil, ""],         do: build_class(t)
+  def build_class([h|t]) when t in [nil,[nil],[""]],  do: h
+  def build_class([h])   when is_binary(h),           do: h
   def build_class([h|t]) do
-    tail = for i <- t, i, i != "", do: [32, i]
+    tail = for i <- t, i && i != "", do: [32, i]
     IO.iodata_to_binary([h | tail])
   end
 
@@ -402,7 +409,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     assigns =
       assigns
       |> assign(:rest,      rest)
-      |> assign(:svg_class, "w-#{size} h-#{size} cursor-pointer#{c1}#{assigns[:class]}")
+      |> assign(:svg_class, build_class(["w-#{size} h-#{size} cursor-pointer", c1, assigns[:class]]))
       |> assign(:path,
           case assigns.type do
             :close  -> ~S|<path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>|
@@ -413,7 +420,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     ~H"""
     <svg id={@id} class={@svg_class} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
       phx-click={@on_click} {@rest}>
-      <title><%= @title %></title>
+      <title :if={@titles || @title}><%= @title %></title>
       <%= raw @path %>
     </svg>
     """

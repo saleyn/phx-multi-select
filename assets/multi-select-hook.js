@@ -74,12 +74,12 @@ const MultiSelectHook = {
     if (ds.colors) {
       let colors = ds.colors.trim().split("|")
       if (hasChecks) {
-        colors[checked ? 0 : 1].split(" ").forEach(c => this.iconS1.classList.remove(c));
-        colors[checked ? 1 : 0].split(" ").forEach(c => this.iconS1.classList.add(c));
+        colors[checked ? 0 : 1].split(" ").filter(x => x != "").forEach(c => this.iconS1.classList.remove(c));
+        colors[checked ? 1 : 0].split(" ").filter(x => x != "").forEach(c => this.iconS1.classList.add(c));
       } else {
         // disable
-        colors[0].split(" ").forEach(c => this.iconS1.classList.remove(c))
-        colors[1].split(" ").forEach(c => this.iconS1.classList.remove(c))
+        colors[0].split(" ").filter(x => x != "").forEach(c => this.iconS1.classList.remove(c))
+        colors[1].split(" ").filter(x => x != "").forEach(c => this.iconS1.classList.remove(c))
       }
     }
 

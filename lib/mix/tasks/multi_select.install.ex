@@ -104,10 +104,12 @@ defmodule Mix.Tasks.MultiSelect.Install do
   defp install_js_hook() do
     file = "multi-select-hook.js"
     path = "assets/js/hooks/#{file}"
-    if File.exists?(path) do
+    src  = "#{Mix.Project.deps_paths()[:phoenix_multi_select]}/assets/#{file}"
+    if File.exists?(path) && File.read!(path) == File.read!(src) do
       out("==> File #{path} is already installed")
     else
-      File.cp!("#{Mix.Project.deps_paths()[:multi_select]}/assets/#{file}", path)
+      File.cp!(src, path)
+      IO.puts("==> Installed #{path} file")
     end
 
     index = "assets/js/hooks/index.js"
