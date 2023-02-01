@@ -111,45 +111,15 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     send_update(__MODULE__, [{:id, id} | attrs])
   end
 
-  @doc false
-  def mount(%{assigns: assigns} = socket) do
-    assigns =
-      assigns
-      |> assign(:filter,         "")
-      |> assign(:cur_shown,      10000)
-      |> assign(:filter_checked, false)
-      |> assign(:option_count,   0)
-      |> assign(:selected_count, 0)
-    {:ok, Map.put(socket, :assigns, assigns)}
-  end
-
-  @doc false
-  def update(%{options: options} = assigns, socket) do
-    socket =
-      socket
-      |> assign(:checked_options, filter_checked_options(options))
-      |> assign(assigns)
-
-    {:ok, socket}
-  end
-
-  def update(%{id: id} = params, %{assigns: %{id: id}} = socket) do
-    {:ok, update2(socket, Map.delete(params, :id))}
-  end
-
-  defp update2(socket, attrs) do
-    Enum.reduce(attrs, socket, fn
-      ({:wrap         = k, v}, s) when is_boolean(v) -> assign(s, k, v)
-      ({:max_selected = k, v}, s) when is_integer(v) -> assign(s, k, v)
-    end)
-  end
-
   ## This setting allows to customize CSS classes. It supposed to return the
   ## module that has `apply_css(key, css_classes) -> css_classes :: String.t` function.
-  @class_callback Application.compile_env(:live_view, :phoenix_multi_select, %{})[:class_module] || __MODULE__
+  @class_callback Application.compile_env(:phoenix_multi_select, :class_module) || __MODULE__
 
   ## Customize the class name shared by the outer div
-  @class_prefix   Application.compile_env(:live_view, :phoenix_multi_select, %{})[:class_prefix]   || "phx-msel"
+  @class_prefix   Application.compile_env(:phoenix_multi_select, :class_prefix) || "phx-msel"
+
+  ## When true, the component will use Alpinejs. Otherwise - Phoenix.LiveView.JS
+  @use_alpinejs   Application.compile_env(:phoenix_multi_select, :use_alpinejs) || false
 
   ## Metadata with all CSS attributes for the MultiSelect component
   @css %{
@@ -160,8 +130,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     tag:              "bg-primary-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
     main_icons:       "right-2 self-center py-1 pl-1 z-10 flex place-items-center",
     body:             "hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
-    filter:           "mb-2 block w-full pl-2 pr-12 px-[11px] rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-    filter_icons:     "absolute inset-y-0 right-2 flex items-center",
+    filter:           "mb-2 block w-full pl-2 pr-12 rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
+    filter_icons:     "absolute inset-y-0 right-2 flex items-center" <> (@use_alpinejs && " mb-2" || ""),
     icon_color:       "fill-zinc-400 hover:fill-zinc-500",
     icon_check_color: "fill-zinc-400 hover:fill-zinc-500 | fill-primary-600 hover:fill-primary-700", # Two sets of colors `on|off`
     options:          "overflow-auto max-h-48 pt-1 pl-1 scrollbar scrollbar-thumb-zinc-400 scrollbar-track-zinc-200 dark:scrollbar-thumb-gray-700 dark:scrollbar-track-gray-900",
@@ -181,6 +151,17 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   @doc false
+  defmacro init_rest(assigns, from_mount) when is_boolean(from_mount) do
+    quote do
+      if @use_alpinejs do
+        unquote(from_mount) && add_alpinejs_assigns(unquote(assigns)) || unquote(assigns)
+      else
+        unquote(from_mount) && unquote(assigns) || add_js_assigns(unquote(assigns))
+      end
+    end
+  end
+
+  @doc false
   def css_fetch(k, true),  do: [@css[k], @css[:colors]] |> build_class()
   def css_fetch(k, false), do: [@css[k]]                |> build_class()
 
@@ -188,14 +169,68 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   def apply_css(_key, value), do: value
 
   @doc false
-  def render(assigns) do
+  defp add_alpinejs_assigns(assigns) do
+    assigns
+    |> assign_new(:top_rest,     fn -> [{"x-data",         "{open: false}"}] end)
+    |> assign_new(:main_rest,    fn -> [{"x-bind:class",   "{'rounded-b-lg': !open}"},
+                                        {"@click.stop",    "open=!open"}] end)
+    |> assign_new(:ddown_events, fn -> [{"@click.outside", "open=false"},
+                                        {"x-bind:class",   "{'hidden': !open }"}] end)
+    |> assign_new(:updown_rest,  fn -> [{"x-bind:class",   "{'rotate-180': open}"}] end)
+  end
+
+  @doc false
+  defp add_js_assigns(assigns) do
+    assigns
+    |> assign_new(:top_rest,     fn -> [] end)
+    |> assign_new(:main_rest,    fn -> [{"phx-click",      toggle_open(assigns[:id])}] end)
+    |> assign_new(:ddown_events, fn -> [{"phx-click-away", toggle_open(assigns[:id])}] end)
+    |> assign_new(:updown_rest,  fn -> [] end)
+  end
+
+  @doc false
+  def mount(%{assigns: assigns} = socket) do
     assigns =
       assigns
-      |> assign(:filter_id, "#{assigns.id}-filter")
+      |> assign(:filter,            "")
+      |> assign(:cur_shown,      10000)
+      |> assign(:filter_checked, false)
+      |> assign(:option_count,       0)
+      |> assign(:selected_count,     0)
+      |> init_rest(true)
 
+    {:ok, Map.put(socket, :assigns, assigns)}
+  end
+
+  @doc false
+  def update(%{options: options} = params, socket) do
+    socket  = assign(socket, params)
+    assigns = socket.assigns
+    assigns =
+      assigns
+      |> assign_new(:filter_id,   fn -> "#{assigns.id}-filter" end)
+      |> assign(:checked_options, filter_checked_options(options))
+      |> init_rest(false)
+
+    {:ok, Map.put(socket, :assigns, assigns)}
+  end
+
+  def update(%{id: id} = params, %{assigns: %{id: id}} = socket) do
+    {:ok, update2(socket, Map.delete(params, :id))}
+  end
+
+  defp update2(socket, attrs) do
+    Enum.reduce(attrs, socket, fn
+      ({:wrap         = k, v}, s) when is_boolean(v) -> assign(s, k, v)
+      ({:max_selected = k, v}, s) when is_integer(v) -> assign(s, k, v)
+    end)
+  end
+
+  @doc false
+  def render(assigns) do
     ~H"""
-    <div id={@id} style={} class={build_class([@class, css(:component)])}>
-      <div id={@id <> "-main"} tabindex="0" class={css(:main, true)} phx-click={toggle_open(@id)} title={@title}>
+    <div id={@id} style={} class={build_class([@class, css(:component)])} {@top_rest}>
+      <div id={@id <> "-main"} tabindex="0" class={css(:main, true)} title={@title} {@main_rest}>
         <div id={@id <> "-tags"} class={css(:tags)} phx-hook="MultiSelectHook"
              data-target={@myself} data-wrap={Atom.to_string(@wrap)} data-filterside={@filter_side}>
           <%= cond do %>
@@ -218,19 +253,23 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
         <div class={css(:main_icons)}>
           <.svg type={:clear} :if={@selected_count > 1}
             title="Clear all selected items" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
-          <.svg id={@id <> "-updown-icon"} type={:updown} size="6"/>
+          <.svg id={@id <> "-updown-icon"} type={:updown} size="6" {@updown_rest}/>
         </div>
       </div>
-      <div id={"#{@id}-dropdown"} tabindex="0" class={css(:body, true)}
-        phx-click-away={toggle_open(@id)}>
+      <div id={"#{@id}-dropdown"} tabindex="0" class={css(:body, true)} {@ddown_events}>
         <div class="w-full p-0 relative">
           <div class={css(:filter_icons)}>
             <.svg id={"#{@id}-flt-check"} type={:check} titles={@search_cbox_titles} color={css(:icon_check_color)}
-                  class={@selected_count == 0 && " opacity-20 pointer-events-none" || nil}/>
+                  class={@selected_count == 0 && "opacity-20 pointer-events-none" || nil}/>
             <input name={"#{@id}-flt-check"} type="hidden" value={@filter_checked}>
             <.svg id={"#{@id}-flt-clear"} type={:clear} title="Clear Filter"/>
           </div>
-          <input id={@filter_id} type="text" autocomplete="off" phx-target={@myself} phx-change={JS.set_attribute({'q', :undefined}, to: @filter_id)}
+          <input id={@filter_id} type="text" autocomplete="off" phx-target={@myself}
+            phx-change={~s([["_",{"to":"#_"}]])
+              # NOTE: JS.set_attribute prevents the input from sending a validation event to server
+              # We can either use JS.add_class("undefined", to: @filter_id) or a the surrogate
+              # command above, which will effectively ignore the event
+            }
             class={css(:filter, true)}
             placeholder={@search_placeholder} value={@filter} phx-debounce={@debounce}>
         </div>
@@ -402,10 +441,13 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   defp svg(assigns) do
     size    = assigns[:size]
     {c1,c2} = color(assigns[:color] || assigns[:colors])
+    rest    = assigns_to_attributes(assigns, [:id, :type, :size, :color, :on_click,
+                                              :params, :target, :title, :titles, :class])
     rest    = add([{"phx-target",  assigns[:target]},
                    {"data-colors", c2},
-                   {"data-titles", assigns[:titles]} |
-                   (for {k,v} <- assigns[:params], do: {"phx-value-#{k}", v})])
+                   {"data-titles", assigns[:titles]}] ++
+                   rest ++
+                   (for {k,v} <- assigns[:params], do: {"phx-value-#{k}", v}))
     assigns =
       assigns
       |> assign(:rest,      rest)
@@ -432,5 +474,6 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
   defp add([]),             do: []
   defp add([{_, nil} | t]), do: add(t)
+  defp add([[] | t]),       do: add(t)
   defp add([kv       | t]), do: [kv | add(t)]
 end

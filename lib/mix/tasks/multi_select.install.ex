@@ -15,6 +15,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
     modify_tailwind_cfg()
     modify_npm_cfg()
     install_js_hook()
+    check_alpinejs()
     :ok
   end
 
@@ -140,6 +141,39 @@ defmodule Mix.Tasks.MultiSelect.Install do
         IO.puts("==> File #{index} modified")
       else
         out("==> File #{index} doesn't require modifications")
+      end
+    end
+  end
+
+  defp check_alpinejs() do
+    if Application.get_env(:phoenix_multi_select, :use_alpinejs) do
+      found =
+        case Path.wildcard("lib/**/root.html.heex") do
+          [root_html] -> File.read!(root_html) =~ ~r/<script.+alpinejs/
+          []          -> false
+        end
+      file  = "assets/js/app.js"
+      found = found ||
+        case File.exists?(file) do
+          true  -> File.read!(file) =~ ~r/import.+alpinejs/
+          false -> false
+        end
+      if not found do
+        IO.puts("""
+          ==> Configuration option `config :phoenix_multi_select, use_alpinejs: true`
+          ==> requires that AlpineJS is available.
+          ==>
+          ==> However AlpineJS configuration is missing! You either need to include:
+          ==>
+          ==>   <script src="//unpkg.com/alpinejs" defer></script>
+          ==>
+          ==> in the root.html.heex template, or add this to the assets/js/app.js:
+          ==>
+          ==>   import 'alpinejs'
+          ==>
+          ==>   window.Alpine = Alpine
+          ==>   Alpine.start()
+          """)
       end
     end
   end

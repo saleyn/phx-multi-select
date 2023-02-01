@@ -14,6 +14,7 @@ collapse them in a single tag
 - Ability to search in the list of options on the client side or on the server
 side
 - Support of light/dark color themes
+- Support of AlpineJS and LiveView.JS javascript libraries
 
 Here's a sample [video](https://youtu.be/TfcgxACXWiM) illustrating what this component looks like in action.
 
@@ -81,7 +82,7 @@ it can be customized in your CSS files, add the following option to `config.exs`
 config.exs:
 ===========
 ...
-config :live_view, :phoenix_multi_select,
+config :phoenix_multi_select,
   class_prefix: "some-class-name"
 ```
 
@@ -90,14 +91,14 @@ component's presentation by defining a custom callback module, that implements
 a `apply_css/2` function, which will be called to get a string of CSS classes
 for every part of the component.  Here is an example where the `primary` color
 is replaced by `pink`.  See the `@css` attribute in
-[multi_select.ex](https://github.com/saleyn/phx-multi-select/blob/main/lib/multi_select.ex#L148) for the list of permissible `tag` values passed to the `apply_css/2`
+[multi_select.ex](https://github.com/saleyn/phx-multi-select/blob/main/lib/multi_select.ex#L125) for the list of permissible `tag` values passed to the `apply_css/2`
 function.
 
 ```
 config.exs:
 ===========
 ...
-config :live_view, :phoenix_multi_select,
+config :phoenix_multi_select,
   class_module: MyModule
 
 my_module.ex:
@@ -106,6 +107,15 @@ defmodule MyModule do
   def apply_css(_tag, def_css_classes), do:
     String.replace(def_css_classes, "primary", "pink")
 end
+```
+
+- In order to enable AlpineJS support instead of LiveView.JS, set this option:
+```
+config.exs:
+===========
+...
+config :phoenix_multi_select,
+  use_alpinejs: true
 ```
 
 ## Demo

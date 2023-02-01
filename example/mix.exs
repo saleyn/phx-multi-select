@@ -41,7 +41,8 @@ defmodule MultiSelectExample.MixProject do
       {:gettext,              "~> 0.20"},
       {:jason,                "~> 1.2"},
       {:plug_cowboy,          "~> 2.5"},
-      {:phoenix_multi_select, git: "https://github.com/saleyn/phx-multi-select.git", branch: "main"},
+      #{:phoenix_multi_select, git: "https://github.com/saleyn/phx-multi-select.git", branch: "main"},
+      {:phoenix_multi_select, path: "../", in_umbrella: true},
     ]
   end
 

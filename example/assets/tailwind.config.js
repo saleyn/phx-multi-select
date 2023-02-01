@@ -9,7 +9,8 @@ module.exports = {
     "./js/**/*.js",
     "../lib/*_web.ex",
     "../lib/*_web/**/*.*ex",
-    "../deps/phoenix_multi_select/lib/*.ex"
+    "../deps/phoenix_multi_select/lib/*.ex",
+    "../../lib/*.ex",
   ],
   theme: {
     extend: {

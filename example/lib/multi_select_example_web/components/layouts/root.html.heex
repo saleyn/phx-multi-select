@@ -8,8 +8,8 @@
       <%= assigns[:page_title] || "MultiSelectExample" %>
     </.live_title>
     <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
-    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}>
-    </script>
+    <script defer phx-track-static type="text/javascript" src={~p"/assets/app.js"}></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
   </head>
   <body>
     <%= @inner_content %>

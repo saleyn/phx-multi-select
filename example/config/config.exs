@@ -7,6 +7,9 @@
 # General application configuration
 import Config
 
+config :phoenix_multi_select,
+  use_alpinejs: false
+
 # Configures the endpoint
 config :multi_select_example, MultiSelectExampleWeb.Endpoint,
   url: [host: "localhost"],

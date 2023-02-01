@@ -48,9 +48,18 @@ config :multi_select_example, MultiSelectExampleWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/multi_select_web/(live|views)/.*(ex)$",
-      ~r"lib/multi_select_web/templates/.*(eex)$"
+      ~r"lib/multi_select_example_web/(live|views)/.*(ex)$",
+      ~r"lib/multi_select_example_web/templates/.*(eex)$",
+      ~r"\.\./lib/.*\.(ex)$",
     ]
+  ]
+
+config :phoenix_live_reload,
+  dirs: [
+    "priv/static",
+    "priv/gettext",
+    "lib/multi_select_example_web",
+    "../lib"
   ]
 
 # Enable dev routes for dashboard and mailbox
