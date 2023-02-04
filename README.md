@@ -44,6 +44,9 @@ files:
 - `assets/js/hooks/multi-select-hook.js` - copied from the multi_select source
 - `assets/js/hooks/index.js` - add the MultiSelectHook
 
+If the AlpineJS support is requested (`:use_alpinejs` options), the `root.html.heex`
+and `app.js` will be checked for installation of AlpineJS.
+
 ## Usage
 
 In your project locate this file `{{your_project}}_web.ex`, and add:
