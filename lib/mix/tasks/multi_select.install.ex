@@ -149,7 +149,7 @@ defmodule Mix.Tasks.MultiSelect.Install do
     if Application.get_env(:phoenix_multi_select, :use_alpinejs) do
       found =
         case Path.wildcard("lib/**/root.html.heex") do
-          [root_html] -> File.read!(root_html) =~ ~r/<script.+alpinejs/
+          [root_html] -> File.read!(root_html) =~ ~r/<[^s]*script.+alpinejs/
           []          -> false
         end
       file  = "assets/js/app.js"

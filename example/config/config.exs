@@ -8,7 +8,7 @@
 import Config
 
 config :phoenix_multi_select,
-  use_alpinejs: false
+  use_alpinejs: true
 
 # Configures the endpoint
 config :multi_select_example, MultiSelectExampleWeb.Endpoint,

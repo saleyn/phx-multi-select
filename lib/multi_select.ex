@@ -172,11 +172,12 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   defp add_alpinejs_assigns(assigns) do
     assigns
     |> assign_new(:top_rest,     fn -> [{"x-data",         "{open: false}"}] end)
-    |> assign_new(:main_rest,    fn -> [{"x-bind:class",   "{'rounded-b-lg': !open}"},
-                                        {"@click.stop",    "open=!open"}] end)
+    |> assign_new(:main_rest,    fn -> [{"x-bind:class",   "{'rounded-b-lg': !open}"}] end)
+    |> assign_new(:tags_rest,    fn -> [{"@click.stop",    "open=!open"}] end)
     |> assign_new(:ddown_events, fn -> [{"@click.outside", "open=false"},
                                         {"x-bind:class",   "{'hidden': !open }"}] end)
-    |> assign_new(:updown_rest,  fn -> [{"x-bind:class",   "{'rotate-180': open}"}] end)
+    |> assign_new(:updown_rest,  fn -> [{"x-bind:class",   "{'rotate-180': open}"},
+                                        {"@click.stop",    "open=!open"}] end)
   end
 
   @doc false
@@ -184,6 +185,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     assigns
     |> assign_new(:top_rest,     fn -> [] end)
     |> assign_new(:main_rest,    fn -> [{"phx-click",      toggle_open(assigns[:id])}] end)
+    |> assign_new(:tags_rest,    fn -> [] end)
     |> assign_new(:ddown_events, fn -> [{"phx-click-away", toggle_open(assigns[:id])}] end)
     |> assign_new(:updown_rest,  fn -> [] end)
   end
@@ -232,7 +234,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     <div id={@id} style={} class={build_class([@class, css(:component)])} {@top_rest}>
       <div id={@id <> "-main"} tabindex="0" class={css(:main, true)} title={@title} {@main_rest}>
         <div id={@id <> "-tags"} class={css(:tags)} phx-hook="MultiSelectHook"
-             data-target={@myself} data-wrap={Atom.to_string(@wrap)} data-filterside={@filter_side}>
+             data-target={@myself} data-wrap={Atom.to_string(@wrap)} data-filterside={@filter_side} {@tags_rest}>
           <%= cond do %>
             <% @selected_count == 0 -> %>
               <span class={css(:placeholder)}><%= @placeholder %></span>
@@ -252,7 +254,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
         </div>
         <div class={css(:main_icons)}>
           <.svg type={:clear} :if={@selected_count > 1}
-            title="Clear all selected items" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
+            title="Clear all selected items" on_click="checked"
+            params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
           <.svg id={@id <> "-updown-icon"} type={:updown} size="6" {@updown_rest}/>
         </div>
       </div>
