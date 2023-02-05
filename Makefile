@@ -8,3 +8,6 @@ compile: deps
 
 clean:
 	rm -fr _build
+
+distclean: clean
+	$(MAKE) -C example $@
