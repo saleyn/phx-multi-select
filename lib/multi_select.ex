@@ -129,7 +129,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     placeholder:      "select-none opacity-50 self-center",
     tag:              "bg-primary-600 rounded-md p-1 gap-1 select-none text-white flex place-items-center",
     main_icons:       "right-2 self-center py-1 pl-1 z-10 flex place-items-center",
-    body:             "hidden -mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md",
+    body:             "-mt-[4px] w-96 p-2 ml-0 z-5 outline-none flex flex-col border-x border-b rounded-b-lg shadow-md" <> (@use_alpinejs && "" || " hidden"),
     filter:           "mb-2 block w-full pl-2 pr-12 rounded-lg focus:outline-none focus:ring-1 sm:text-sm sm:leading-6 phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
     filter_icons:     "absolute inset-y-0 right-2 flex items-center" <> (@use_alpinejs && " mb-2" || ""),
     icon_color:       "fill-zinc-400 hover:fill-zinc-500",
@@ -172,12 +172,12 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   defp add_alpinejs_assigns(assigns) do
     assigns
     |> assign_new(:top_rest,     fn -> [{"x-data",         "{open: false}"}] end)
-    |> assign_new(:main_rest,    fn -> [{"x-bind:class",   "{'rounded-b-lg': !open}"}] end)
-    |> assign_new(:tags_rest,    fn -> [{"@click.stop",    "open=!open"}] end)
-    |> assign_new(:ddown_events, fn -> [{"@click.outside", "open=false"},
-                                        {"x-bind:class",   "{'hidden': !open }"}] end)
-    |> assign_new(:updown_rest,  fn -> [{"x-bind:class",   "{'rotate-180': open}"},
-                                        {"@click.stop",    "open=!open"}] end)
+    |> assign_new(:main_rest,    fn -> [{"x-bind:class",   "{'rounded-b-lg': !open}"},
+                                        {"@click",         "open=!open"}] end)
+    |> assign_new(:tags_rest,    fn -> [] end)
+    |> assign_new(:ddown_events, fn -> [{"@click.outside", "open=!open"},
+                                        {"x-show",         "open"}] end)
+    |> assign_new(:updown_rest,  fn -> [{"x-bind:class",   "{'rotate-180': open}"}] end)
   end
 
   @doc false

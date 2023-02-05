@@ -11,8 +11,7 @@ defmodule MultiSelectExampleWeb.SampleData do
     %{id: 9,  label: "Romance"},
     %{id: 10, label: "Novel"},
     %{id: 11, label: "Poems"},
-    %{id: 12, label: "Very Long Topic String1"},
-    %{id: 13, label: "Even Longer Topic String That Does Not Fit"},
+    %{id: 12, label: "Some Long Topic String"},
   ]
 
   @topics_map for t <- @topics, into: %{}, do: {t.id, t.label}
