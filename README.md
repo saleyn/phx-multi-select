@@ -63,7 +63,7 @@ In your project locate this file `{{your_project}}_web.ex`, and add:
 
 Now in the `*.html.heex` templates you can use the `multi_select` LiveView
 component like this:
-```heex
+```elixir
 <.multi_select
   id="some-id"
   options={
