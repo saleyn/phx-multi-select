@@ -63,7 +63,7 @@ In your project locate this file `{{your_project}}_web.ex`, and add:
 
 Now in the `*.html.heex` templates you can use the `multi_select` LiveView
 component like this:
-```html
+```heex
 <.multi_select
   id="some-id"
   options={
@@ -77,14 +77,12 @@ component like this:
 For list of the available component's options see
 `Phoenix.LiveView.Components.MultiSelect.multi_select/1`
 
-## Customization
+## Customization (`config.exs` file)
 
-- In order to add a custom class name to the `multi_select` component so that
-it can be customized in your CSS files, add the following option to `config.exs`:
-```
-config.exs:
-===========
-...
+- In order to add a custom class name to the `multi_select` component that will be
+added to the top-most `div` element, and that it can be customized in your CSS files,
+add the following configuration option:
+```elixir
 config :phoenix_multi_select,
   class_prefix: "some-class-name"
 ```
@@ -94,16 +92,15 @@ component's presentation by defining a custom callback module, that implements
 a `apply_css/2` function, which will be called to get a string of CSS classes
 for every part of the component.  Here is an example where the `primary` color
 is replaced by `pink`.  See the `@css` attribute in
-[multi_select.ex](https://github.com/saleyn/phx-multi-select/blob/main/lib/multi_select.ex#L125) for the list of permissible `tag` values passed to the `apply_css/2`
-function.
+[multi_select.ex](https://github.com/saleyn/phx-multi-select/blob/main/lib/multi_select.ex#L125)
+for the list of permissible `tag` values passed to the `apply_css/2` function.
 
-```
-config.exs:
-===========
-...
+```elixir
 config :phoenix_multi_select,
   class_module: MyModule
-
+```
+Here's is an example of implementation of such a module:
+```elixir
 my_module.ex:
 =============
 defmodule MyModule do
@@ -112,11 +109,8 @@ defmodule MyModule do
 end
 ```
 
-- In order to enable AlpineJS support instead of LiveView.JS, set this option:
-```
-config.exs:
-===========
-...
+- In order to enable AlpineJS support instead of LiveView.JS, set this config option:
+```elixir
 config :phoenix_multi_select,
   use_alpinejs: true
 ```
@@ -126,7 +120,7 @@ config :phoenix_multi_select,
 The demo project is located in the `examples/` directory, and can be compiled
 and run with:
 
-```
+```bash
 cd examples
 make
 make run
