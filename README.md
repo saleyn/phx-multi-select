@@ -31,7 +31,7 @@ Include the project in the `mix.exs` as a dependency:
 ```elixir
 defp deps do
   [
-    {:phoenix_multi_select, "~> 0.0"},
+    {:phoenix_multi_select, "~> 0.1"},
     ...
   ]
 ```
