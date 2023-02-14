@@ -93,19 +93,13 @@ const MultiSelectHook = {
   applyFilter(obj, mounted) {
     const filterVal     = this.filter.value
     const filterChecked = this.inputS1.value === 'true'
-    //console.log(`Mounted: ${mounted}, filter: ${filterEle.value}`)
-    const optsItems = document.querySelectorAll('[id^=multi-opts]>div>label>input')
+    const optsItems = document.querySelectorAll(`[id^=${this.id}-opts]>div>label>input`)
     let   hasChecks = false
     for (let opt of optsItems)
       if (opt.checked) {
         hasChecks = true
         break
       }
-
-    //if (mounted && filterEle.value == "" && obj.oldFilterVal != "")
-    //  filterEle.value = obj.oldFilterVal
-    //else if (filterEle.value !== obj.oldFilterVal)
-    //  obj.oldFilterVal = filterEle.value
 
     let rex = new RegExp();
     try { rex = new RegExp(filterVal, 'i'); } catch (_) { }
