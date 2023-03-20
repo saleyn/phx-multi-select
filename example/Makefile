@@ -10,13 +10,15 @@ deps:
 	mkdir -p $@
 
 multi_select.install: deps.get assets/js/hooks/multi-select-hook.js
-	mix $@
+
+assets/js/hooks/multi-select-hook.js:
+	mix multi_select.install
 
 clean:
 	rm -fr _build assets/node_modules priv/static/assets/app*
 
 distclean: clean
-	rm -fr deps priv/static
+	rm -fr deps priv/static assets/js/hooks/multi-select-hook.js
 
 run: assets/node_modules
 	iex -S mix phx.server
