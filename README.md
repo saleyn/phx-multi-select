@@ -54,10 +54,12 @@ In your `assets/js/app.js` be sure to add the `hooks` entry with the live socket
 initialization:
 
 ```javascript
+import hooks from "./hooks"
+
 let liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken },
-  hooks: { MultiSelectHook },
-});
+  hooks: hooks
+})
 ```
 
 In your project locate this file `{{your_project}}_web.ex`, and add:
@@ -78,11 +80,11 @@ component like this:
 ```elixir
 <.multi_select
   id="some-id"
-  options={
+  options={[
     {id: 1, label: "Option1"},
     {id: 2, label: "Option2"},
     ...
-  }
+  ]}
 />
 ```
 
