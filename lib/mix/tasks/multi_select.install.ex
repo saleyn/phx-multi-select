@@ -97,8 +97,18 @@ defmodule Mix.Tasks.MultiSelect.Install do
     if File.exists?(file) and (File.read!(file) =~ "tailwind-scrollbar") do
       out("==> File #{file} doesn't require modifications")
     else
-      {_, 0} = System.cmd("npm", ~w(install -D tailwind-scrollbar), cd: "assets")
+      pkg_mgr = get_package_mgr(["npm", "yarn"])
+      {_, 0} = System.cmd(pkg_mgr, ~w(install -D tailwind-scrollbar), cd: "assets")
       IO.puts("==> Added tailwind-scrollbar NPM dev package")
+    end
+  end
+
+  defp get_package_mgr([]), do:
+    raise RuntimeError, message: "No JS package manager found: npm, yarn."
+  defp get_package_mgr([name|tail]) do
+    case System.cmd("sh", ["-c", "which " <> name]) do
+      {_, 0} -> name
+      {_, _} -> get_package_mgr(tail)
     end
   end
 
