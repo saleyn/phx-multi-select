@@ -104,14 +104,10 @@ defmodule Mix.Tasks.MultiSelect.Install do
 
   defp install_js_hook() do
     hooks_folder = "assets/js/hooks"
-    unless File.exists?(hooks_folder) do
-      File.mkdir!(hooks_folder)
-    end
+    index_file   = "assets/js/hooks/index.js"
 
-    index_file = "assets/js/hooks/index.js"
-    unless File.exists?(index_file) do
-      File.touch!(index_file)
-    end
+    File.exists?(hooks_folder) || File.mkdir!(hooks_folder)
+    File.exists?(index_file)   || File.touch!(index_file)
 
     file = "multi-select-hook.js"
     path = "assets/js/hooks/#{file}"
