@@ -45,6 +45,8 @@ files:
 - `assets/js/hooks/multi-select-hook.js` - copied from the multi_select source
 - `assets/js/hooks/index.js` - add the MultiSelectHook
 
+Install the javascript packages with your preferred package manager e.g `cd assets && npm install` or `cd assets && yarn install`
+
 If the AlpineJS support is requested (`:use_alpinejs` options), the `root.html.heex`
 and `app.js` will be checked for installation of AlpineJS.
 
@@ -54,12 +56,12 @@ In your `assets/js/app.js` be sure to add the `hooks` entry with the live socket
 initialization:
 
 ```javascript
-import hooks from "./hooks"
-
+import hooks from "./hooks" // <--- add this line
+...
 let liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken },
-  hooks: hooks
-})
+  hooks: hooks, // <--- add this line
+});
 ```
 
 In your project locate this file `{{your_project}}_web.ex`, and add:
@@ -81,8 +83,8 @@ component like this:
 <.multi_select
   id="some-id"
   options={[
-    {id: 1, label: "Option1"},
-    {id: 2, label: "Option2"},
+    %{id: 1, label: "Option1"},
+    %{id: 2, label: "Option2"},
     ...
   ]}
 />
