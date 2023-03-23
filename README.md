@@ -70,7 +70,7 @@ In your project locate this file `{{your_project}}_web.ex`, and add:
   defp html_helpers do
     quote do
       ...
-      import Phoenix.LiveView.Components.MultiSelect   ## <--- add this line
+      use Phoenix.LiveView.Components.MultiSelect   ## <--- add this line
       ...
     end
   end
