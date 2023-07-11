@@ -103,8 +103,10 @@ defmodule Mix.Tasks.MultiSelect.Install do
     end
   end
 
-  defp get_package_mgr([]), do:
+  defp get_package_mgr([]) do
     raise RuntimeError, message: "No JS package manager found: npm, yarn."
+  end
+
   defp get_package_mgr([name|tail]) do
     case System.cmd("sh", ["-c", "which " <> name]) do
       {_, 0} -> name

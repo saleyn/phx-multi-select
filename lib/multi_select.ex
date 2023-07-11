@@ -112,7 +112,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   ## This setting allows to customize CSS classes. It supposed to return the
-  ## module that has `apply_css(key, css_classes) -> css_classes :: String.t` function.
+  ## module that has `apply_css(id, key, css_classes) -> css_classes :: String.t` function.
   @class_callback Application.compile_env(:phoenix_multi_select, :class_module) || __MODULE__
 
   ## Customize the class name shared by the outer div
@@ -141,12 +141,12 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   }
 
   @doc false
-  defmacro css(key, add_color_class \\ false) do
+  defmacro css(id, key, add_color_class \\ false) do
     quote do
       value =
         unquote(key)
         |> unquote(__MODULE__).css_fetch(unquote(add_color_class))
-      @class_callback.apply_css(unquote(key), value)
+      @class_callback.apply_css(unquote(id), unquote(key), value)
     end
   end
 
@@ -166,7 +166,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   def css_fetch(k, false), do: [@css[k]]                |> build_class()
 
   @doc false
-  def apply_css(_key, value), do: value
+  def apply_css(_id, _key, value), do: value
 
   @doc false
   defp add_alpinejs_assigns(assigns) do
@@ -231,38 +231,38 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   @doc false
   def render(assigns) do
     ~H"""
-    <div id={@id} style={} class={build_class([@class, css(:component)])} {@top_rest}>
-      <div id={@id <> "-main"} tabindex="0" class={css(:main, true)} title={@title} {@main_rest}>
-        <div id={@id <> "-tags"} class={css(:tags)} phx-hook="MultiSelectHook"
+    <div id={@id} style={} class={build_class([@class, css(@id, :component)])} {@top_rest}>
+      <div id={@id <> "-main"} tabindex="0" class={css(@id, :main, true)} title={@title} {@main_rest}>
+        <div id={@id <> "-tags"} class={css(@id, :tags)} phx-hook="MultiSelectHook"
              data-target={@myself} data-wrap={Atom.to_string(@wrap)} data-filterside={@filter_side} {@tags_rest}>
           <%= cond do %>
             <% @selected_count == 0 -> %>
-              <span class={css(:placeholder)}><%= @placeholder %></span>
+              <span class={css(@id, :placeholder)}><%= @placeholder %></span>
             <% @selected_count > @cur_shown and not @wrap -> %>
-              <span class={css(:tag)}>
+              <span class={css(@id, :tag)}>
                 <span><%= @selected_count %> items selected</span>
                 <.svg type={:close} size="4" color="" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
               </span>
             <% true -> %>
               <%= for option <- @checked_options do %>
-                <span id={"#{@id}-tag-#{option.id}"} class={css(:tag) <> " flex-wrap shrink-0"}>
+                <span id={"#{@id}-tag-#{option.id}"} class={css(@id, :tag) <> " flex-wrap shrink-0"}>
                   <span><%= option.label %></span>
                   <.svg type={:close} size="4" color="" on_click="checked" params={[{"uncheck", option.id}, {"id", @id}]} target={@myself}/>
                 </span>
               <% end %>
           <% end %>
         </div>
-        <div class={css(:main_icons)}>
+        <div class={css(@id, :main_icons)}>
           <.svg type={:clear} :if={@selected_count > 1}
             title="Clear all selected items" on_click="checked"
             params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
           <.svg id={@id <> "-updown-icon"} type={:updown} size="6" {@updown_rest}/>
         </div>
       </div>
-      <div id={"#{@id}-dropdown"} tabindex="0" class={css(:body, true)} {@ddown_events}>
+      <div id={"#{@id}-dropdown"} tabindex="0" class={css(@id, :body, true)} {@ddown_events}>
         <div class="w-full p-0 relative">
-          <div class={css(:filter_icons)}>
-            <.svg id={"#{@id}-flt-check"} type={:check} titles={@search_cbox_titles} color={css(:icon_check_color)}
+          <div class={css(@id, :filter_icons)}>
+            <.svg id={"#{@id}-flt-check"} type={:check} titles={@search_cbox_titles} color={css(@id, :icon_check_color)}
                   class={@selected_count == 0 && "opacity-20 pointer-events-none" || nil}/>
             <input name={"#{@id}-flt-check"} type="hidden" value={@filter_checked}>
             <.svg id={"#{@id}-flt-clear"} type={:clear} title="Clear Filter"/>
@@ -273,10 +273,10 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
               # We can either use JS.add_class("undefined", to: @filter_id) or a the surrogate
               # command above, which will effectively ignore the event
             }
-            class={css(:filter, true)}
+            class={css(@id, :filter, true)}
             placeholder={@search_placeholder} value={@filter} phx-debounce={@debounce}>
         </div>
-        <div id={"#{@id}-opts"} class={css(:options)}>
+        <div id={"#{@id}-opts"} class={css(@id, :options)}>
           <%=
             for opt <- @options,
                 id        = "#{@id}[#{opt.id}]",
@@ -286,9 +286,9 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
             do
           %>
             <div class="pr-0">
-              <label for={id} class={css(:option_label)}
+              <label for={id} class={css(@id, :option_label)}
               ><input id={id} name={id} type="checkbox" phx-change="checked" phx-target={@myself}
-                      checked={opt.selected} value="on" class={css(:option_input) <> cursor}
+                      checked={opt.selected} value="on" class={css(@id, :option_input) <> cursor}
                       {rest}><%= opt.label %></label>
             </div>
           <% end %>

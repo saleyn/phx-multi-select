@@ -106,11 +106,14 @@ config :phoenix_multi_select,
 
 - You can also override the build-in CSS classes for every aspect of the
   component's presentation by defining a custom callback module, that implements
-  a `apply_css/2` function, which will be called to get a string of CSS classes
+  a `apply_css/3` function, which will be called to get a string of CSS classes
   for every part of the component. Here is an example where the `primary` color
-  is replaced by `pink`. See the `@css` attribute in
+  is replaced by `pink`. The first argument to the `apply_css/3` function is
+  the ID of the element that needs to apply customization. This way if the page
+  has multiple multi selects, they can be styled differently. See the `@css`
+  attribute in
   [multi_select.ex](https://github.com/saleyn/phx-multi-select/blob/main/lib/multi_select.ex#L125)
-  for the list of permissible `tag` values passed to the `apply_css/2` function.
+  for the list of permissible `tag` values passed to the `apply_css/3` function.
 
 ```elixir
 config :phoenix_multi_select,
@@ -123,7 +126,7 @@ Here is an example of implementation of such a module:
 my_module.ex:
 =============
 defmodule MyModule do
-  def apply_css(_tag, def_css_classes), do:
+  def apply_css(_id, _tag, def_css_classes), do:
     String.replace(def_css_classes, "primary", "pink")
 end
 ```
