@@ -212,6 +212,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       assigns
       |> assign_new(:filter_id,   fn -> "#{assigns.id}-filter" end)
       |> assign(:checked_options, filter_checked_options(options))
+      |> assign(:selected_count, get_selected_count(options))
       |> init_rest(false)
 
     {:ok, Map.put(socket, :assigns, assigns)}
@@ -220,6 +221,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   def update(%{id: id} = params, %{assigns: %{id: id}} = socket) do
     {:ok, update2(socket, Map.delete(params, :id))}
   end
+
+  defp get_selected_count(options), do: Enum.count(options, fn opt -> opt.selected end)
 
   defp update2(socket, attrs) do
     Enum.reduce(attrs, socket, fn
