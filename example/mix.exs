@@ -9,6 +9,7 @@ defmodule MultiSelectExample.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      prune_code_paths: Mix.env() == :prod,
       deps: deps()
     ]
   end
