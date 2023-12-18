@@ -208,10 +208,14 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   def update(%{options: options} = params, socket) do
     socket  = assign(socket, params)
     assigns = socket.assigns
+
+    checked_options = filter_checked_options(options)
+
     assigns =
       assigns
       |> assign_new(:filter_id,   fn -> "#{assigns.id}-filter" end)
-      |> assign(:checked_options, filter_checked_options(options))
+      |> assign(:checked_options, checked_options)
+      |> assign(:selected_count, length(checked_options))
       |> init_rest(false)
 
     {:ok, Map.put(socket, :assigns, assigns)}
