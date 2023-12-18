@@ -93,7 +93,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   attr :search_cbox_titles,   :string,  default:  "Clear filter of selected items|Filter selected items",
                                                         doc: "Titles `on|off` of the checked icon in the search checkbox"
   attr :filter_side,          :atom,    default:  :client, values: [:client, :server]
-  attr :selected_items_label, :string, default: "items selected", doc: "Label to use when wrapping tags under a label"
+  attr :selected_items_label, :string, default: "items selected", doc: "Label to use when tags are not wrapped"
 
   def multi_select(assigns) do
     assigns = assign(assigns, :options, (for o <- assigns.options, do: Option.new(o)))
