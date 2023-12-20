@@ -78,21 +78,22 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       (default: "Clear filter of selected items|Filter selected items")
     * `:filter_side` - apply item filtering on client or server (default: client)
   """
-  attr :id,                 :string,  required: true
-  attr :debounce,           :integer, default:  350
-  attr :options,            :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
-  attr :form,               :any,     required: true
-  attr :on_change,          :any,                      doc: "Lambda `(options) -> ok` to be called on selecting items"
-  attr :class,              :string,  default:  nil
-  attr :max_selected,       :integer, default:  nil,   doc: "Max number of items selected"
-  attr :max_shown,          :integer, default:  100000,doc: "Max number of shown selected tags"
-  attr :wrap,               :boolean, default:  false, doc: "Permit multiline wrapping of selected items"
-  attr :title,              :string,  default:  nil,   doc: "Component tooltip title"
-  attr :placeholder,        :string,  default:  "Select...", doc: "Placeholder shown on empty input"
-  attr :search_placeholder, :string,  default:  "Search...", doc: "Placeholder for the search input"
-  attr :search_cbox_titles, :string,  default:  "Clear filter of selected items|Filter selected items",
-                                                       doc: "Titles `on|off` of the checked icon in the search checkbox"
-  attr :filter_side,        :atom,    default:  :client, values: [:client, :server]
+  attr :id,                   :string,  required: true
+  attr :debounce,             :integer, default:  350
+  attr :options,              :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
+  attr :form,                 :any,     required: true
+  attr :on_change,            :any,                      doc: "Lambda `(options) -> ok` to be called on selecting items"
+  attr :class,                :string,  default:  nil
+  attr :max_selected,         :integer, default:  nil,   doc: "Max number of items selected"
+  attr :max_shown,            :integer, default:  100000,doc: "Max number of shown selected tags"
+  attr :wrap,                 :boolean, default:  false, doc: "Permit multiline wrapping of selected items"
+  attr :title,                :string,  default:  nil,   doc: "Component tooltip title"
+  attr :placeholder,          :string,  default:  "Select...", doc: "Placeholder shown on empty input"
+  attr :search_placeholder,   :string,  default:  "Search...", doc: "Placeholder for the search input"
+  attr :search_cbox_titles,   :string,  default:  "Clear filter of selected items|Filter selected items",
+                                                        doc: "Titles `on|off` of the checked icon in the search checkbox"
+  attr :filter_side,          :atom,    default:  :client, values: [:client, :server]
+  attr :selected_items_label, :string,  default: "items selected", doc: "Label to use when tags are not wrapped"
 
   def multi_select(assigns) do
     assigns = assign(assigns, :options, (for o <- assigns.options, do: Option.new(o)))
@@ -244,7 +245,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
               <span class={css(@id, :placeholder)}><%= @placeholder %></span>
             <% @selected_count > @cur_shown and not @wrap -> %>
               <span class={css(@id, :tag)}>
-                <span><%= @selected_count %> items selected</span>
+                <span><%= @selected_count %> <%= @selected_items_label %></span>
                 <.svg type={:close} size="4" color="" on_click="checked" params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
               </span>
             <% true -> %>
