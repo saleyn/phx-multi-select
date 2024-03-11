@@ -9,5 +9,8 @@ compile: deps
 clean:
 	rm -fr _build
 
+outdated:
+	mix hex.$@
+
 distclean: clean
 	$(MAKE) -C example $@

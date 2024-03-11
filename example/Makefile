@@ -23,6 +23,9 @@ distclean: clean
 run: assets/node_modules
 	iex -S mix phx.server
 
+outdated:
+	mix hex.$@
+
 assets/node_modules:
 	cd assets && npm install
 
