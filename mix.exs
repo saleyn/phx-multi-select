@@ -45,10 +45,10 @@ defmodule MultiSelect.MixProject do
   # Specifies your project dependencies.
   defp deps do
     [
-      {:phoenix,             "~> 1.6"},
+      {:phoenix,             "~> 1.7"},
       {:phoenix_html,        "~> 4.1"},
-      {:phoenix_live_view,   "~> 0.18"},
-      {:ex_doc,              "~> 0.19", only: :dev, runtime: false},
+      {:phoenix_live_view,   "~> 0.20"},
+      {:ex_doc,              "~> 0.31", only: :dev, runtime: false},
     ]
   end
 end

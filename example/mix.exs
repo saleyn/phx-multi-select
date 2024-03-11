@@ -31,17 +31,17 @@ defmodule MultiSelectExample.MixProject do
   # Specifies your project dependencies.
   defp deps do
     [
-      {:phoenix,              "~> 1.7.0-rc.2", override: true},
+      {:phoenix,              "~> 1.7",   override: true},
       {:phoenix_html,         "~> 4.1"},
-      {:phoenix_live_reload,  "~> 1.2",        only: :dev},
+      {:phoenix_live_reload,  "~> 1.5",       only: :dev},
       {:phoenix_live_view,    "~> 0.20"},
       {:heroicons,            "~> 0.5"},
-      {:esbuild,              "~> 0.5",    runtime: Mix.env() == :dev},
+      {:esbuild,              "~> 0.8",    runtime: Mix.env() == :dev},
       {:tailwind,             "~> 0.2",    runtime: Mix.env() == :dev},
-      {:faker,                "~> 0.17",   runtime: false},
-      {:gettext,              "~> 0.20"},
-      {:jason,                "~> 1.2"},
-      {:plug_cowboy,          "~> 2.5"},
+      {:faker,                "~> 0.18",   runtime: false},
+      {:gettext,              "~> 0.24"},
+      {:jason,                "~> 1.4"},
+      {:plug_cowboy,          "~> 2.7"},
       #{:phoenix_multi_select, git: "https://github.com/saleyn/phx-multi-select.git", branch: "main"},
       {:phoenix_multi_select, path: "../", in_umbrella: true},
     ]
