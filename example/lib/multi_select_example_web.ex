@@ -87,7 +87,7 @@ defmodule MultiSelectExampleWeb do
       # Core UI components and translation
       import MultiSelectExampleWeb.CoreComponents
       import MultiSelectExampleWeb.Gettext
-      use    Phoenix.LiveView.Components.MultiSelect
+      import Phoenix.LiveView.Components.MultiSelect
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
