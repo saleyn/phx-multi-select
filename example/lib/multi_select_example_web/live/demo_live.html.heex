@@ -1,5 +1,5 @@
 <div id={@id} class="relative p-2 flex place-content-left">
-  <.form :let={f} for={:input} id={"#{@id}-ms-form"}
+  <.form :let={f} for={%{}} as={:input} id={"#{@id}-ms-form"}
           class="flex flex-col md:flex-row gap-5 md:gap-2" phx-change="validate" phx-submit="save">
     <label for="max_selected" class="flex px-5 text-sm font-medium text-gray-900 dark:text-gray-300 place-items-center"
            title="Limits the number of items the user is allowed to select from the list">
