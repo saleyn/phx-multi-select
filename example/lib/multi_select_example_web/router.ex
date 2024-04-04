@@ -18,7 +18,7 @@ defmodule MultiSelectExampleWeb.Router do
     pipe_through :browser
 
     live_session :default do
-      live "/", DemoLive
+      live "/",       DemoLive
       live "/result", ResultLive
     end
   end

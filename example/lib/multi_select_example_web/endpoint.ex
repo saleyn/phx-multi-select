@@ -5,10 +5,10 @@ defmodule MultiSelectExampleWeb.Endpoint do
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
-    store: :cookie,
-    key: "_multi_select_example_key",
+    store:        :cookie,
+    key:          "_multi_select_example_key",
     signing_salt: "hNQNb+2x",
-    same_site: "Lax"
+    same_site:    "Lax"
   ]
 
   socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]
