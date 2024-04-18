@@ -1,20 +1,20 @@
-defmodule MultiSelectExampleWeb.SampleData do
-  @topics [
-    %{id: 1,  label: "Action"},
-    %{id: 2,  label: "History"},
-    %{id: 3,  label: "Fiction"},
-    %{id: 4,  label: "Science Fiction"},
-    %{id: 5,  label: "Documentary"},
-    %{id: 6,  label: "General Literature"},
-    %{id: 7,  label: "Prose"},
-    %{id: 8,  label: "Adventure"},
-    %{id: 9,  label: "Romance"},
-    %{id: 10, label: "Novel"},
-    %{id: 11, label: "Poems"},
-    %{id: 12, label: "Some Long Topic String"},
-  ]
+defmodule MultiSelectExample.SampleData do
+  @topics Enum.with_index([
+    "Action",
+    "History",
+    "Fiction",
+    "Science Fiction",
+    "Documentary",
+    "General Literature",
+    "Prose",
+    "Adventure",
+    "Romance",
+    "Novel",
+    "Poems",
+    "Some Long Topic String",
+  ], fn(value, i) -> %{id: i+1, value: value} end)
 
-  @topics_map for t <- @topics, into: %{}, do: {t.id, t.label}
+  @topics_map for t <- @topics, into: %{}, do: {t.id, t.value}
   @topics_count length(@topics)
 
   @sample_data (
@@ -42,9 +42,18 @@ defmodule MultiSelectExampleWeb.SampleData do
       }
     end)
 
+  @samle_long_data 1..100
+    |> Enum.map(fn _ -> Faker.Fruit.En.fruit() end)
+    |> Enum.uniq()
+    |> Enum.map(& :lists.duplicate(10, &1))
+    |> :lists.append()
+    |> Enum.with_index(fn a, i -> %{id: i+1, value: "#{a}-#{i+1}"} end)
+    |> Enum.sort()
+
   def list_topics(),   do: @topics
   def map_topics(),    do: @topics_map
   def topics_count(),  do: @topics_count
+  def long_data(),     do: @samle_long_data
 
   def topic_by_id(id), do: @topics_map[id]
 

@@ -19,6 +19,7 @@ defmodule MultiSelectExampleWeb.Router do
 
     live_session :default do
       live "/",       DemoLive
+      live "/cbox",   ComboBoxLive
       live "/result", ResultLive
     end
   end

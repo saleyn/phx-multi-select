@@ -1,20 +1,37 @@
 defmodule MultiSelectExampleWeb.DemoLive do
   use MultiSelectExampleWeb, :live_view
 
-  alias MultiSelectExampleWeb.SampleData
+  alias MultiSelectExample.SampleData
   alias Phoenix.LiveView.Components.MultiSelect
   alias Phoenix.LiveView.Components.MultiSelect.Option
+  alias Phoenix.LiveView.Components.ComboBox
 
   @id "multi"
 
   @impl true
   def mount(_params, _session, socket) do
-    options = for t <- SampleData.list_topics(), do: Option.new(t)
+    options     = SampleData.list_topics()
+    options_gen = fn(value) ->
+      case value do
+        "" ->
+          SampleData.list_topics()
+        _  ->
+          val = String.downcase(value)
+          Enum.reduce(options, [], fn(opt, acc) ->
+            o = Option.new(opt)
+            String.contains?(o.value_lc, val) && [o | acc] || acc
+          end)
+          |> Enum.reverse()
+      end
+    end
+
     socket  =
       socket
       |> assign_new(:id,           fn -> "multi-select-example" end)
       |> assign_new(:wrap,         fn -> false end)
       |> assign_new(:max_selected, fn -> SampleData.topics_count() end)
+      |> assign_new(:user,         fn -> "" end)
+      |> assign_new(:options_generator, fn -> options_gen end)
       |> update_assigns(options)
 
     {:ok, socket}
@@ -44,10 +61,8 @@ defmodule MultiSelectExampleWeb.DemoLive do
     {:noreply, assign(socket, :wrap, wrap)}
   end
 
-  def handle_event("validate", %{"_target" => ["max_selected"]} = params, socket) do
-    value = String.to_integer(params["max_selected"])
-    MultiSelect.update_settings(@id, max_selected: value)
-    {:noreply, assign(socket, :max_selected, value)}
+  def handle_event("validate", %{"_target" => _}, socket) do
+    {:noreply, socket}
   end
 
   defp update_assigns(socket, options) do

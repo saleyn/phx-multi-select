@@ -32,19 +32,25 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     """
     defstruct \
       id:       nil,
-      label:    nil,
+      value:    nil,
+      value_lc: nil,
       selected: false
 
     @type t :: %__MODULE__{
       id:       integer,
-      label:    String.t,
+      value:    String.t,
+      value_lc: String.t,
       selected: boolean
     }
 
-    def new(%{} = map) do
+    def new(%{value: val} = map), do: new(map, val |> String.downcase())
+
+    def new(%{} = map, value_lc) when is_binary(value_lc) do
+      value = Map.get(map, :value)
       %__MODULE__{
         id:       Map.get(map, :id),
-        label:    Map.get(map, :label),
+        value:    value,
+        value_lc: value_lc,
         selected: Map.get(map, :selected) || false,
       }
     end
@@ -60,7 +66,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     * `:debounce` - the integer controlling a `phx-debounce` value for the
       search input
 
-    * `:options` - a required list of `%{id: any(), label: string()}` options to
+    * `:options` - a required list of `%{id: any(), value: string()}` options to
       select from
 
     * `:form` - the required form name owning this component
@@ -80,7 +86,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   """
   attr :id,                   :string,  required: true
   attr :debounce,             :integer, default:  350
-  attr :options,              :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
+  attr :options,              :list,    default:  [],    doc: "List of `%{id: String.t, value: String.t}` maps"
   attr :form,                 :any,     required: true
   attr :on_change,            :any,                      doc: "Lambda `(options) -> ok` to be called on selecting items"
   attr :class,                :string,  default:  nil
@@ -152,12 +158,13 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   @doc false
-  defmacro init_rest(assigns, from_mount) when is_boolean(from_mount) do
+  @spec    init_rest(map(), boolean()) :: map()
+  defmacro init_rest(socket, from_mount) do
     quote do
       if @use_alpinejs do
-        unquote(from_mount) && add_alpinejs_assigns(unquote(assigns)) || unquote(assigns)
+        unquote(from_mount) && add_alpinejs_assigns(unquote(socket)) || unquote(socket)
       else
-        unquote(from_mount) && unquote(assigns) || add_js_assigns(unquote(assigns))
+        unquote(from_mount) && unquote(socket) || add_js_assigns(unquote(socket))
       end
     end
   end
@@ -170,8 +177,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   def apply_css(_id, _key, value), do: value
 
   @doc false
-  defp add_alpinejs_assigns(assigns) do
-    assigns
+  defp add_alpinejs_assigns(socket) do
+    socket
     |> assign_new(:top_rest,     fn -> [{"x-data",         "{open: false}"}] end)
     |> assign_new(:main_rest,    fn -> [{"x-bind:class",   "{'rounded-b-lg': !open}"},
                                         {"@click",         "open=!open"}] end)
@@ -182,8 +189,8 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   @doc false
-  defp add_js_assigns(assigns) do
-    assigns
+  defp add_js_assigns(%{assigns: assigns} = socket) do
+    socket
     |> assign_new(:top_rest,     fn -> [] end)
     |> assign_new(:main_rest,    fn -> [{"phx-click",      toggle_open(assigns[:id])}] end)
     |> assign_new(:tags_rest,    fn -> [] end)
@@ -192,17 +199,18 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   @doc false
-  def mount(%{assigns: assigns} = socket) do
-    assigns =
-      assigns
+  def mount(socket) do
+    # NOTE: the assigns passed from the .live_component are only available in
+    # the update/2 callback.  mount/1 is only used for initialization
+    {:ok,
+      socket
       |> assign(:filter,            "")
       |> assign(:cur_shown,      10000)
       |> assign(:filter_checked, false)
       |> assign(:option_count,       0)
       |> assign(:selected_count,     0)
       |> init_rest(true)
-
-    {:ok, Map.put(socket, :assigns, assigns)}
+    }
   end
 
   @doc false
@@ -212,14 +220,13 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
     checked_options = filter_checked_options(options)
 
-    assigns =
-      assigns
+    {:ok,
+      socket
       |> assign_new(:filter_id,   fn -> "#{assigns.id}-filter" end)
       |> assign(:checked_options, checked_options)
       |> assign(:selected_count, length(checked_options))
       |> init_rest(false)
-
-    {:ok, Map.put(socket, :assigns, assigns)}
+    }
   end
 
   def update(%{id: id} = params, %{assigns: %{id: id}} = socket) do

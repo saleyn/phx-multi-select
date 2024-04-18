@@ -1,6 +1,6 @@
 defmodule MultiSelectExampleWeb.ResultLive do
   use   MultiSelectExampleWeb, :live_view
-  alias MultiSelectExampleWeb.SampleData
+  alias MultiSelectExample.SampleData
 
   def mount(params, _session, socket) do
     vals   =

@@ -19,7 +19,7 @@
         Wrap tags
       </label>
     </div>
-    <div class="col-span-2 flex gap-2">
+    <div class="flex gap-2">
       <MultiSelect.multi_select
         id="multi"
         options={@topics}
@@ -27,6 +27,18 @@
         on_change={fn opts -> send(self(), {:updated_options, opts}) end}
         max_selected={@max_selected}
         wrap={@wrap}
+        placeholder="Select topic..."
+        title="Select tipics to filter quotes"
+      />
+      <button name="submit" class="mt-2 p-3 h-12 rounded-md font-medium text-sm text-white bg-primary-600 hover:bg-primary-500">Submit</button>
+    </div>
+    <div class="flex gap-2">
+      <ComboBox.combobox
+        id="cbox"
+        options={@topics}
+        form={f}
+        on_change={fn opts -> send(self(), {:updated_options, opts}) end}
+        max_selected={@max_selected}
         placeholder="Select topic..."
         title="Select tipics to filter quotes"
       />
