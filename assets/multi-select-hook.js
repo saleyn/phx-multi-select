@@ -5,6 +5,7 @@
 const MultiSelectHook = {
   wasWrapped: false,
   oldFilterVal: "",
+  currentFilterVal: "",
   id:     null,
   input:  null,
   iconS1: null,
@@ -16,9 +17,13 @@ const MultiSelectHook = {
     this.inputS1 = document.getElementsByName(`${this.id}-flt-check`)[0]
     this.iconS1  = document.getElementById(`${this.id}-flt-check`)
     this.iconS2  = document.getElementById(`${this.id}-flt-clear`)
+    this.persistSearch = this.el.dataset.persistsearch == 'true'
 
     // Client-side value filtering with filtering value sent to server
-    this.filter.onkeyup = (evt) => this.applyFilter(this, true)
+    this.filter.onkeyup = (evt) => {
+      this.currentFilter = this.filter.value
+      this.applyFilter(this, true)
+    }
 
     this.filterClearIcon().onclick = (obj) => {
       this.filter.value = ''
@@ -58,6 +63,9 @@ const MultiSelectHook = {
   },
 
   updated() {
+    if (this.currentFilter && this.persistSearch) {
+      this.filter.value = this.currentFilter
+    }
     this.applyFilter(this, false)
     this.updateCheckIconState(this.inputS1.value === 'true')
   },
@@ -91,7 +99,7 @@ const MultiSelectHook = {
   filterCheckIcon() { return document.getElementById(`${this.id}-flt-check`) },
 
   applyFilter(obj, mounted) {
-    const filterVal     = this.filter.value
+    const filterVal = this.filter.value
     const filterChecked = this.inputS1.value === 'true'
     const optsItems = document.querySelectorAll(`[id^=${this.id}-opts]>div>label>input`)
     let   hasChecks = false
