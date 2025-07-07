@@ -104,7 +104,7 @@ config :phoenix_multi_select,
   class_prefix: "some-class-name"
 ```
 
-- You can also override the build-in CSS classes for every aspect of the
+- You can also override the built-in CSS classes for every aspect of the
   component's presentation by defining a custom callback module, that implements
   a `apply_css/3` function, which will be called to get a string of CSS classes
   for every part of the component. Here is an example where the `primary` color

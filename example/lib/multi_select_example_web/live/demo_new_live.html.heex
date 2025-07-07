@@ -60,30 +60,3 @@
     </div>
   </.form>
 </div>
-<div class="w-full mt-4">
-  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 w-full min-w-[300px]">
-    <%= for qte <- @quotes do %>
-      <div class="rounded overflow-hidden shadow-md dark:shadow-slate-800 m-2 p-2 flex flex-col border border-gray-200 dark:border-gray-800">
-        <div class="flex">
-          <img
-            class="w-24 h-24 mr-2 mb-2 object-contain rounded-md"
-            src={qte.image <> "?size=96x96"}
-          />
-          <div class="flex flex-col">
-            <div class="font-bold text-lg text-slate-800 dark:text-slate-300">
-              <%= qte.title %>
-            </div>
-            <div class="pb-3 gap-1">
-              <%= for topic <- qte.topics do %>
-                <span class="inline-block bg-gray-200 dark:bg-blue-600 dark:text-gray-900 rounded-full m-0.5 px-1 py-0.5 text-xs text-gray-700">
-                  #<%= topic %>
-                </span>
-              <% end %>
-            </div>
-          </div>
-        </div>
-        <p class="text-gray-700 dark:text-slate-400 text-base"><%= qte.description %></p>
-      </div>
-    <% end %>
-  </div>
-</div>

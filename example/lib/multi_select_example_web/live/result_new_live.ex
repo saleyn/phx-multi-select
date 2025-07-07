@@ -1,4 +1,4 @@
-defmodule MultiSelectExampleWeb.ResultLive do
+defmodule MultiSelectExampleWeb.ResultNewLive do
   use MultiSelectExampleWeb, :live_view
   alias MultiSelectExampleWeb.SampleData
 
@@ -40,7 +40,7 @@ defmodule MultiSelectExampleWeb.ResultLive do
     <div class="flex justify-center">
       <button
         id="result-ok"
-        phx-click={JS.navigate(~p"/")}
+        phx-click={JS.navigate(~p"/demo")}
         phx-disable-with
         class="py-2 px-3 mt-4 rounded-md text-white bg-blue-500 hover:bg-blue-600"
       >
