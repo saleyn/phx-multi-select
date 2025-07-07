@@ -47,7 +47,7 @@ defmodule MultiSelect.MixProject do
     [
       {:phoenix,             "~> 1.7"},
       {:phoenix_html,        "~> 4.1"},
-      {:phoenix_live_view,   "~> 0.20"},
+      {:phoenix_live_view,   "~> 1.0.17"},
       {:ex_doc,              "~> 0.31", only: :dev, runtime: false},
     ]
   end
