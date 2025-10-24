@@ -60,7 +60,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     * `:debounce` - the integer controlling a `phx-debounce` value for the
       search input
 
-    * `:options` - a required list of `%{id: any(), label: string()}` options to
+    * `:options` - a required list of `%{id: integer(), label: string()}` options to
       select from
 
     * `:form` - the required form name owning this component
@@ -80,7 +80,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   """
   attr :id,                   :string,  required: true
   attr :debounce,             :integer, default:  350
-  attr :options,              :list,    default:  [],    doc: "List of `%{id: String.t, label: String.t}` maps"
+  attr :options,              :list,    default:  [],    doc: "List of `%{id: integer(), label: String.t()}` maps"
   attr :form,                 :any,     required: true
   attr :on_change,            :any,                      doc: "Lambda `(options) -> ok` to be called on selecting items"
   attr :class,                :string,  default:  nil
