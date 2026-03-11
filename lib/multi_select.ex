@@ -70,6 +70,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
 
     * `:class` - class added to the main `div` of the component
     * `:max_selected` - max number of selected items
+    * `:select_all` - adds an option to select all items
     * `:wrap` - allow to wrap selected tags to multiple lines
     * `:title` - component's title to use as the tooltip
     * `:placeholder` - component's placeholder text
@@ -86,6 +87,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   attr :class,                :string,  default:  nil
   attr :max_selected,         :integer, default:  nil,   doc: "Max number of items selected"
   attr :max_shown,            :integer, default:  100000,doc: "Max number of shown selected tags"
+  attr :select_all,           :boolean, default:  false, doc: "Adds select all items option"
   attr :wrap,                 :boolean, default:  false, doc: "Permit multiline wrapping of selected items"
   attr :title,                :string,  default:  nil,   doc: "Component tooltip title"
   attr :placeholder,          :string,  default:  "Select...", doc: "Placeholder shown on empty input"
@@ -217,6 +219,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
       |> assign_new(:filter_id,   fn -> "#{assigns.id}-filter" end)
       |> assign(:checked_options, checked_options)
       |> assign(:selected_count, length(checked_options))
+      |> assign(:option_count, length(options))
       |> init_rest(false)
 
     {:ok, Map.put(socket, :assigns, assigns)}
@@ -261,6 +264,9 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
           <.svg type={:clear} :if={@selected_count > 1}
             title="Clear all selected items" on_click="checked"
             params={[{"uncheck", "all"}, {"id", @id}]} target={@myself}/>
+          <.svg type={:all} :if={@select_all && @selected_count < @option_count}
+            title="Select all items" on_click="checked"
+            params={[{"check", "all"}, {"id", @id}]} target={@myself}/>
           <.svg id={@id <> "-updown-icon"} type={:updown} size="6" {@updown_rest}/>
         </div>
       </div>
@@ -345,6 +351,11 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
     set_selected(socket, item, false)
   end
 
+  ## Checkbox [✓] checked on a selected tag
+  def handle_event("checked", %{"check" => item, "id" => id}, %{assigns: %{id: id}} = socket) do
+    set_selected(socket, item, true)
+  end
+
   ## Icon [✓] or [X] clicked on the "Search..." filter input
   def handle_event("filter", %{"icon" => icon}, %{assigns: assigns} = socket) do
     socket =
@@ -372,6 +383,14 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
         (opt, {n, acc}) -> {n+1, [struct(opt, selected: selected?) | acc]}
       end)
     sel_count = selected? && count || 0
+    # When selecting all from empty state, set cur_shown to 0 to immediately
+    # show the `:selected_items_label` and avoid flash of individual pills
+    socket =
+      if selected? and socket.assigns.selected_count == 0 do
+        assign(socket, :cur_shown, 0)
+      else
+        socket
+      end
     set_selected2(socket, Enum.reverse(options), count, sel_count)
   end
   defp set_selected(%{assigns: assigns} = socket, idx, selected?) do
@@ -436,7 +455,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
   end
 
   attr :id,       :string,  default: nil
-  attr :type,     :atom,    values:  [:close, :clear, :check, :updown]
+  attr :type,     :atom,    values:  [:close, :clear, :check, :all, :updown]
   attr :size,     :string,  default: "5"
   attr :color,    :string,  default: @css.icon_color
   attr :on_click, :any,     default: nil
@@ -465,6 +484,7 @@ defmodule Phoenix.LiveView.Components.MultiSelect do
             :close  -> ~S|<path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>|
             :clear  -> ~S|<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>|
             :check  -> ~S|<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>|
+            :all    -> ~S|<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-9V7a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2z" clip-rule="evenodd"/>|
             :updown -> ~S|<path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>|
           end)
     ~H"""

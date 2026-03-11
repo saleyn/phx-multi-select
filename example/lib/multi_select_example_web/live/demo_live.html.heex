@@ -26,6 +26,7 @@
         form={f}
         on_change={fn opts -> send(self(), {:updated_options, opts}) end}
         max_selected={@max_selected}
+        select_all={true}
         wrap={@wrap}
         placeholder="Select topic..."
         title="Select tipics to filter quotes"
